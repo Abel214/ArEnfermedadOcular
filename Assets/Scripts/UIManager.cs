@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject mainMenuCanvas;
     [SerializeField] private GameObject itemsMenuCanvas;
     [SerializeField] private GameObject ArPositionCanvas;
+    [SerializeField] private GameObject aiCanvas;
 
     void Start()
     {
@@ -27,6 +28,8 @@ public class UIManager : MonoBehaviour
         itemsMenuCanvas.transform.GetChild(1).transform.DOMoveY(180, 0.3f);
         ArPositionCanvas.transform.GetChild(0).transform.DOScale(new Vector3(0, 0, 0), 0.3f);
         ArPositionCanvas.transform.GetChild(1).transform.DOScale(new Vector3(0, 0, 0), 0.3f);
+        if (aiCanvas != null)
+            aiCanvas.SetActive(false);
     }
 
     private void ActivatItemsMenu()

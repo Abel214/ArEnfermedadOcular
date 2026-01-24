@@ -10,12 +10,16 @@ public class ItemButtonManager : MonoBehaviour
     private Sprite itemImage;
     private string itemDescription;
     private GameObject item3DModel;
-    private ARInteractionManager interactionManager; // ← AR en mayúsculas
+    private Item itemData; // ← NUEVO: Guardar referencia al ScriptableObject
+
+    private ARInteractionManager interactionManager;
+    private ARMedicalAI medicalAI; // ← NUEVO
 
     public string ItemName { set => itemName = value; }
     public string ItemDescription { set => itemDescription = value; }
     public Sprite ItemImage { set => itemImage = value; }
     public GameObject Item3DModel { set => item3DModel = value; }
+    public Item ItemData { set => itemData = value; } // ← NUEVO
 
     public void Initialize()
     {
@@ -33,10 +37,18 @@ public class ItemButtonManager : MonoBehaviour
         button.onClick.AddListener(Create3DModel);
 
         interactionManager = FindFirstObjectByType<ARInteractionManager>();
+        medicalAI = FindFirstObjectByType<ARMedicalAI>(); // ← NUEVO
     }
 
     private void Create3DModel()
     {
-        interactionManager.Item3DModel = Instantiate(item3DModel);
+        GameObject instance = Instantiate(item3DModel);
+        interactionManager.Item3DModel = instance;
+
+        // ← NUEVO: Pasar información a la IA
+        if (medicalAI != null && itemData != null)
+        {
+            medicalAI.SetCurrentItem(itemData, instance);
+        }
     }
 }
