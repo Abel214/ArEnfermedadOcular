@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be57d3a0ec051844eac3af6663fb815d, type: 3}
+  m_Name: AnatomiaGlaucoma
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  itemName: "Glaucoma Anatom\xEDa"
+  itemImage: {fileID: 21300000, guid: 4648e264d62859949bab73853aa5e573, type: 3}
+  itemDescription: "Glaucoma Anatom\xEDa"
+  item3DModel: {fileID: 5899215094199109904, guid: fde08213230aaeb41ab57566f7ac07bd, type: 3}
