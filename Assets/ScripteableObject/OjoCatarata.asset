@@ -16,3 +16,8 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: 0e55f2194f9b8d6469e42f88e7b3fa08, type: 3}
   itemDescription: Ojo con catarata
   item3DModel: {fileID: 3434081477994860094, guid: fadf95276f11550489c95077a6ae390b, type: 3}
+  medicalContext: "\"La catarata es la opacificaci\xF3n del cristalino. Este modelo
+    muestra \nla vista EXTERNA del ojo, donde puedes observar:\n- Cristalino opaco
+    (blanquecino)\n- C\xF3rnea normal\n- Iris visible\nS\xEDntomas: visi\xF3n borrosa,
+    deslumbramiento, colores apagados.\""
+  isAnatomyView: 0

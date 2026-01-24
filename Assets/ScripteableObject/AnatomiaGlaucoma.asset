@@ -16,3 +16,9 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: 4648e264d62859949bab73853aa5e573, type: 3}
   itemDescription: "Glaucoma Anatom\xEDa"
   item3DModel: {fileID: 5899215094199109904, guid: fde08213230aaeb41ab57566f7ac07bd, type: 3}
+  medicalContext: "\"El glaucoma es una enfermedad que aumenta la presi\xF3n intraocular,
+    \nda\xF1ando el nervio \xF3ptico. Este modelo muestra la anatom\xEDa INTERNA
+    del ojo, \ndonde puedes ver:\n- Nervio \xF3ptico da\xF1ado\n- Aumento de humor
+    acuoso\n- \xC1ngulo iridocorneal bloqueado\nS\xEDntomas: p\xE9rdida gradual de
+    visi\xF3n perif\xE9rica, visi\xF3n de t\xFAnel.\"\n"
+  isAnatomyView: 1

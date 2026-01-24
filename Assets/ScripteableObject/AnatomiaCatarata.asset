@@ -16,3 +16,9 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: 4a7c4154d31d0084989b66ade5f7e988, type: 3}
   itemDescription: "Catarata anatom\xEDa"
   item3DModel: {fileID: 2197011312247461529, guid: 8386aa1657bce384ea9850a944b44a89, type: 3}
+  medicalContext: "\"La catarata es la opacificaci\xF3n progresiva del cristalino
+    que afecta\r\nla correcta entrada de luz al ojo. Este modelo muestra la anatom\xEDa
+    INTERNA\r\ndel ojo, donde puedes observar:\r\n- Cristalino opacificado\r\n- Trayectoria
+    de la luz alterada\r\n- Relaci\xF3n del cristalino con retina y nervio \xF3ptico\r\nS\xEDntomas:
+    visi\xF3n borrosa, disminuci\xF3n de la nitidez, dificultad para ver de noche.\""
+  isAnatomyView: 0
