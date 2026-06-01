@@ -49,7 +49,7 @@ PlayerSettings:
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 1
   unsupportedMSAAFallback: 0
-  m_SpriteBatchMaxVertexCount: 65535
+  m_SpriteBatchMaxVertexCount: 1024
   m_SpriteBatchVertexThreshold: 300
   m_MTRendering: 1
   mipStripping: 0
@@ -832,7 +832,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN
+    Android: DOTWEEN;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
@@ -951,7 +951,7 @@ PlayerSettings:
   cloudProjectId: ac762cac-ecde-43af-8a86-7b745b69cb4d
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Borrador2
+  projectName: EnfermedadesOcularesAR
   organizationId: unity_f3f033135d4969690851
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0

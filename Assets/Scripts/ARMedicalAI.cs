@@ -32,7 +32,7 @@ public class ARMedicalAI : MonoBehaviour
 
     void Start()
     {
-        arInteractionManager = FindFirstObjectByType<ARInteractionManager>();
+        arInteractionManager = FindAnyObjectByType<ARInteractionManager>();
 
         // Inicializar UI
         aiPanel.SetActive(false);
