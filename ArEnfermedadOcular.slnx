@@ -36,6 +36,7 @@
   <Project Path="Unity.InferenceEngine.csproj" />
   <Project Path="Unity.XR.ARKit.Editor.csproj" />
   <Project Path="Unity.XR.CoreUtils.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.XR.Simulation.Editor.csproj" />
   <Project Path="NativeShare.Editor.csproj" />
   <Project Path="Unity.Searcher.Editor.csproj" />
@@ -86,7 +87,6 @@
   <Project Path="Unity.XR.Management.Editor.csproj" />
   <Project Path="Unity.XR.Interaction.Toolkit.CodeSamples.Tests.csproj" />
   <Project Path="Unity.RenderPipelines.Core.Runtime.Shared.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.AppUI.Navigation.csproj" />
   <Project Path="Unity.InputSystem.ForUI.csproj" />
   <Project Path="Unity.XR.Interaction.Toolkit.Analytics.Hooks.Editor.csproj" />

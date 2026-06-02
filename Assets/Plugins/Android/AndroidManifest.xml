@@ -3,42 +3,39 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-	<!-- PERMISOS NECESARIOS PARA AR -->
-	<uses-permission android:name="android.permission.CAMERA" />
-	<uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-	<!-- CARACTERÍSTICAS DE HARDWARE PARA AR -->
-	<uses-feature android:name="android.hardware.camera" android:required="true" />
-	<uses-feature android:name="android.hardware.camera.ar" android:required="true" />
-	<uses-feature android:glEsVersion="0x00030000" android:required="true" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
+    <uses-feature android:glEsVersion="0x00030000" android:required="true" />
 
-	<application>
-		<!-- META-DATA PARA ARCORE -->
-		<meta-data android:name="com.google.ar.core" android:value="required" />
+    <application>
+        <meta-data android:name="com.google.ar.core" android:value="required" />
 
-		<!--Used when Application Entry is set to Activity, otherwise remove this activity block-->
-		<activity android:name="com.unity3d.player.UnityPlayerActivity"
+        <activity android:name="com.unity3d.player.UnityPlayerActivity"
                   android:theme="@style/UnityThemeSelector"
                   android:screenOrientation="portrait"
                   android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-			<meta-data android:name="unityplayer.UnityActivity" android:value="true" />
-		</activity>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+        </activity>
 
-		<!--Used when Application Entry is set to GameActivity, otherwise remove this activity block-->
-		<activity android:name="com.unity3d.player.UnityPlayerGameActivity"
+        <activity android:name="com.unity3d.player.UnityPlayerGameActivity"
                   android:theme="@style/BaseUnityGameActivityTheme"
                   android:screenOrientation="portrait"
                   android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-			<meta-data android:name="unityplayer.UnityActivity" android:value="true" />
-			<meta-data android:name="android.app.lib_name" android:value="game" />
-		</activity>
-	</application>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+            <meta-data android:name="android.app.lib_name" android:value="game" />
+        </activity>
+    </application>
 </manifest>

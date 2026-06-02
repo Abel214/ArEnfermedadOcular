@@ -14,7 +14,7 @@ public class ItemButtonManager : MonoBehaviour
 
     private ARInteractionManager interactionManager;
     private ARMedicalAI medicalAI; // ← NUEVO
-
+    public string GetItemName() => itemName;
     public string ItemName { set => itemName = value; }
     public string ItemDescription { set => itemDescription = value; }
     public Sprite ItemImage { set => itemImage = value; }
@@ -40,7 +40,7 @@ public class ItemButtonManager : MonoBehaviour
         medicalAI = FindFirstObjectByType<ARMedicalAI>(); // ← NUEVO
     }
 
-    private void Create3DModel()
+    public void Create3DModel()
     {
         GameObject instance = Instantiate(item3DModel);
         interactionManager.Item3DModel = instance;
