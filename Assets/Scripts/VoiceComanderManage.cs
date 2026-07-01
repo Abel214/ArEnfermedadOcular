@@ -5,81 +5,69 @@ public class VoiceComanderManage : MonoBehaviour
     [Header("Menús")]
     public GameObject itemsMenuCanvas;
     public GameObject arPositionCanvas;
-
-    [Header("Indicador visual")]
     public GameObject micIcon;
 
     void Start()
     {
-        Debug.Log("=== VoiceCommandManager iniciado ===");
-
         if (AndroidVoiceRecognizer.Instance == null)
             Debug.LogError("AndroidVoiceRecognizer no encontrado!");
         else
         {
             AndroidVoiceRecognizer.Instance.OnCommandRecognized += ProcesarComando;
-            Debug.Log("=== Evento suscrito correctamente ===");
+            Debug.Log("=== VoiceCommandManager iniciado ===");
         }
-
-        itemsMenuCanvas.SetActive(false);
-        arPositionCanvas.SetActive(false);
     }
 
     void ProcesarComando(string comando)
     {
         Debug.Log("=== COMANDO RECIBIDO: " + comando + " ===");
-        if (micIcon) micIcon.SetActive(false);
 
         if (comando.Contains("colocar") || comando.Contains("modelo")
             || comando.Contains("objeto") || comando.Contains("mostrar"))
         {
-            Debug.Log("=== ABRIENDO MENU ===");
-            itemsMenuCanvas.SetActive(true);
+            GameManager.instance.ItemsMenu();
         }
         else if (comando.Contains("catarata"))
-            ColocarModelo("catarata");
+            ColocarModeloPorNombre("catarata");
         else if (comando.Contains("conjuntivitis"))
-            ColocarModelo("conjuntivitis");
+            ColocarModeloPorNombre("conjuntivitis");
         else if (comando.Contains("glaucoma"))
-            ColocarModelo("glaucoma");
+            ColocarModeloPorNombre("glaucoma");
         else if (comando.Contains("sano") || comando.Contains("normal"))
-            ColocarModelo("sano");
-        else if (comando.Contains("anatomia") || comando.Contains("anatomía"))
-            ColocarModelo("anatomia");
-        else if (comando.Contains("cerrar") || comando.Contains("ocultar"))
-            itemsMenuCanvas.SetActive(false);
+            ColocarModeloPorNombre("sano");
+        else if (comando.Contains("cerrar") || comando.Contains("volver")
+                 || comando.Contains("menu"))
+            GameManager.instance.MainMenu();
         else if (comando.Contains("eliminar") || comando.Contains("borrar"))
-            EliminarModelo();
-        else if (comando.Contains("explica") || comando.Contains("qué es")
-         || comando.Contains("que es") || comando.Contains("información"))
         {
+            FindAnyObjectByType<ARInteractionManager>().DeleteItem();
+            GameManager.instance.MainMenu(); // vuelve al menú tras eliminar
+        }
+
+        else if (comando.Contains("explica") || comando.Contains("información")
+                 || comando.Contains("que es") || comando.Contains("qué es"))
             FindAnyObjectByType<ARMedicalAI>().AskAboutCurrentItem();
-        }
         else if (comando.Contains("síntomas") || comando.Contains("sintomas"))
-        {
             FindAnyObjectByType<ARMedicalAI>()
-                .AskAboutCurrentItem("¿Cuáles son los síntomas principales?");
-        }
-        else if (comando.Contains("tratamiento") || comando.Contains("cura"))
-        {
+                .AskAboutCurrentItem("¿Cuáles son los síntomas?");
+        else if (comando.Contains("tratamiento"))
             FindAnyObjectByType<ARMedicalAI>()
                 .AskAboutCurrentItem("¿Cuál es el tratamiento?");
-        }
-        else if (comando.Contains("causa") || comando.Contains("por qué"))
-        {
-            FindAnyObjectByType<ARMedicalAI>()
-                .AskAboutCurrentItem("¿Cuáles son las causas?");
-        }
-    }
-    void ColocarModelo(string nombre)
-    {
-        itemsMenuCanvas.SetActive(false);
-        FindAnyObjectByType<ARInteractionManager>().ColocarPorNombre(nombre);
     }
 
-    void EliminarModelo()
+    void ColocarModeloPorNombre(string nombre)
     {
-        FindAnyObjectByType<ARInteractionManager>().EliminarModelo();
+        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>();
+        foreach (var boton in botones)
+        {
+            if (boton.name.ToLower().Contains(nombre))
+            {
+                boton.Create3DModel();
+                GameManager.instance.ArPosition();
+                return;
+            }
+        }
+        Debug.LogWarning("No encontrado: " + nombre);
     }
 
     public void BotonMicrofono()
@@ -91,7 +79,6 @@ public class VoiceComanderManage : MonoBehaviour
     void OnDestroy()
     {
         if (AndroidVoiceRecognizer.Instance != null)
-            AndroidVoiceRecognizer.Instance.OnCommandRecognized -=
-                ProcesarComando;
+            AndroidVoiceRecognizer.Instance.OnCommandRecognized -= ProcesarComando;
     }
 }
