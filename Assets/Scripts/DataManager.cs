@@ -27,9 +27,9 @@ public class DataManager : MonoBehaviour
             itemButton.ItemDescription = item.itemDescription;
             itemButton.ItemImage = item.itemImage;
             itemButton.Item3DModel = item.item3DModel;
+            itemButton.ItemData = item;
             itemButton.name = item.itemName;
 
-            // ✅ AGREGAR ESTA LÍNEA - Inicializar después de asignar todo
             itemButton.Initialize();
         }
 

@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class GameManager : MonoBehaviour
 
 {
     public event Action OnMainMenu;
     public event Action OnItemsMenu;
     public event Action OnArPosition;
+    public event Action OnIAMenu;
     public static GameManager instance;
 
 
@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
         OnMainMenu?.Invoke();
         Debug.Log("Main Menu Activated");
         Debug.Log("Items Menu Activated");
-
+        Debug.Log("AI Menu Activated");
 
     }
 
@@ -54,6 +54,11 @@ public class GameManager : MonoBehaviour
     public void CloseApp()
     {
         Application.Quit();
+    }
+    public void AIMenu()
+    {
+        OnIAMenu?.Invoke();
+        Debug.Log("AI Menu Activate");
     }
 
 

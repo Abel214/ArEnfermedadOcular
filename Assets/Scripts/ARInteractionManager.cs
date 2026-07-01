@@ -57,7 +57,7 @@ public class ARInteractionManager : MonoBehaviour
 
     void Start()
     {
-        aRRaycastManager = FindFirstObjectByType<ARRaycastManager>();
+        aRRaycastManager = FindAnyObjectByType<ARRaycastManager>();
         GameManager.instance.OnMainMenu += SetItemPosition;
     }
 
@@ -244,5 +244,26 @@ public class ARInteractionManager : MonoBehaviour
         isDragging = false;
         isPlacingMode = false;
         GameManager.instance.MainMenu();
+    }
+    public void ColocarPorNombre(string nombre)
+    {
+        // Buscar entre todos los botones generados
+        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>();
+        foreach (var boton in botones)
+        {
+            // Buscar por el nombre del item que tiene asignado
+            if (boton.GetItemName().ToLower().Contains(nombre.ToLower()))
+            {
+                boton.Create3DModel();
+                GameManager.instance.ArPosition();
+                return;
+            }
+        }
+        Debug.LogWarning("No se encontró modelo: " + nombre);
+    }
+
+    public void EliminarModelo()
+    {
+        DeleteItem(); // Ya tienes este método
     }
 }
