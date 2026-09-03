@@ -101,7 +101,6 @@ public class MenuPrincipalManager : MonoBehaviour
     {
         DOTween.KillAll();
 
-        // Animación de salida antes de cargar escena
         Sequence salida = DOTween.Sequence();
         salida.Append(btnTutorial.transform
             .DOScale(Vector3.zero, 0.15f));
@@ -116,7 +115,8 @@ public class MenuPrincipalManager : MonoBehaviour
             .DOScale(Vector3.zero, 0.2f));
         salida.OnComplete(() =>
         {
-            SceneManager.LoadScene("SampleScene");
+            
+            SceneManager.LoadScene("Avance de proyecto15-06-2026");
         });
     }
 
@@ -155,6 +155,7 @@ public class MenuPrincipalManager : MonoBehaviour
     // ─── BOTÓN INFO (opcional) ────────────────────
     public void AbrirInfo()
     {
+        FindAnyObjectByType<InfoManager>().AbrirInfo();
         Debug.Log("Info abierto");
         // Implementar si es necesario
     }
