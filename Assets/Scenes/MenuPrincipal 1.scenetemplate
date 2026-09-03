@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13966, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: MenuPrincipal
+  m_Name: MenuPrincipal 1
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.SceneTemplate.SceneTemplateAsset
   templateScene: {fileID: 102900000, guid: 50bf12bef9b6a9542bcf222dc5c4dc78, type: 3}
   templateName: 
