@@ -116,7 +116,7 @@ public class MenuPrincipalManager : MonoBehaviour
         salida.OnComplete(() =>
         {
             
-            SceneManager.LoadScene("Avance de proyecto15-06-2026");
+            SceneManager.LoadScene("Interfaz");
         });
     }
 
