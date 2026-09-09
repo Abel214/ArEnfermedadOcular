@@ -42,6 +42,7 @@ public class ARInteractionManager : MonoBehaviour
         {
             item3Dmodel = value;
             isPlacingMode = true;
+            FindAnyObjectByType<ModeloHelpText>()?.MostrarTexto();
         }
     }
 

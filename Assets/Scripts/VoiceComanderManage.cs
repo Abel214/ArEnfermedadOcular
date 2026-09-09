@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class VoiceComanderManage : MonoBehaviour
 {
@@ -35,15 +37,20 @@ public class VoiceComanderManage : MonoBehaviour
             ColocarModeloPorNombre("glaucoma");
         else if (comando.Contains("sano") || comando.Contains("normal"))
             ColocarModeloPorNombre("sano");
-        else if (comando.Contains("cerrar") || comando.Contains("volver")
-                 || comando.Contains("menu"))
+        else if (comando.Contains("volver") || comando.Contains("salir")
+                 || comando.Contains("menu principal"))
+        {
+            StartCoroutine(VolverAlMenu());
+        }
+        else if (comando.Contains("cerrar") || comando.Contains("menu"))
+        {
             GameManager.instance.MainMenu();
+        }
         else if (comando.Contains("eliminar") || comando.Contains("borrar"))
         {
             FindAnyObjectByType<ARInteractionManager>().DeleteItem();
-            GameManager.instance.MainMenu(); // vuelve al menú tras eliminar
+            GameManager.instance.MainMenu();
         }
-
         else if (comando.Contains("explica") || comando.Contains("información")
                  || comando.Contains("que es") || comando.Contains("qué es"))
             FindAnyObjectByType<ARMedicalAI>().AskAboutCurrentItem();
@@ -53,6 +60,19 @@ public class VoiceComanderManage : MonoBehaviour
         else if (comando.Contains("tratamiento"))
             FindAnyObjectByType<ARMedicalAI>()
                 .AskAboutCurrentItem("¿Cuál es el tratamiento?");
+    }
+
+    IEnumerator VolverAlMenu()
+    {
+        Debug.Log("Volviendo al menú principal...");
+
+        // Detener escucha continua antes de cambiar escena
+        if (AndroidVoiceRecognizer.Instance != null)
+            AndroidVoiceRecognizer.Instance.DetenerEscuchaContinua();
+
+        yield return new WaitForSeconds(0.5f);
+
+        SceneManager.LoadScene("MenuPrincipal");
     }
 
     void ColocarModeloPorNombre(string nombre)

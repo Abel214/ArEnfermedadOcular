@@ -36,8 +36,8 @@ public class ItemButtonManager : MonoBehaviour
         button.onClick.AddListener(GameManager.instance.ArPosition);
         button.onClick.AddListener(Create3DModel);
 
-        interactionManager = FindFirstObjectByType<ARInteractionManager>();
-        medicalAI = FindFirstObjectByType<ARMedicalAI>(); // ← NUEVO
+        interactionManager = FindAnyObjectByType<ARInteractionManager>();
+        medicalAI = FindAnyObjectByType<ARMedicalAI>(); // ← NUEVO
     }
 
     public void Create3DModel()
