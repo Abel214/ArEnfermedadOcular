@@ -825,7 +825,7 @@ VideoPlayer:
   m_RenderMode: 2
   m_AspectRatio: 1
   m_DataSource: 0
-  m_TimeUpdateMode: 2
+  m_TimeUpdateMode: 1
   m_PlaybackSpeed: 1
   m_AudioOutputMode: 1
   m_TargetAudioSources:
@@ -1316,6 +1316,7 @@ RectTransform:
   m_Children:
   - {fileID: 656519257}
   - {fileID: 94083363}
+  - {fileID: 1610639399}
   - {fileID: 1567100778}
   - {fileID: 1772660167}
   - {fileID: 1143868250}
@@ -2443,7 +2444,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &434819195
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2479,7 +2480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentacionAvatar
   panelPresentacion: {fileID: 434819194}
-  fondoBlanco: {fileID: 1068758633}
+  fondoBlanco: {fileID: 1068758635}
   avatarVideo: {fileID: 59251454}
   videoPlayer: {fileID: 59251456}
   videoSaludo: {fileID: 32900000, guid: 830a85c02782455449fe6f32dc77b46b, type: 3}
@@ -2492,7 +2493,8 @@ MonoBehaviour:
   btnSalida: {fileID: 482197483}
   iconoSettings: {fileID: 1502736595}
   iconoInfo: {fileID: 1829520214}
-  elementosMenu: []
+  ojoAnatomico: {fileID: 94083362}
+  titulo: {fileID: 1567100777}
 --- !u!222 &434819198
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2519,7 +2521,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &482197484
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3289,7 +3291,6 @@ GameObject:
   - component: {fileID: 728503685}
   - component: {fileID: 728503687}
   - component: {fileID: 728503686}
-  - component: {fileID: 728503688}
   m_Layer: 5
   m_Name: PanelSetting
   m_TagString: Untagged
@@ -3358,18 +3359,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 728503684}
   m_CullTransparentMesh: 1
---- !u!114 &728503688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 728503684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b9135c228aff4c42a2b21f306b6edc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PanelSettingsManager
 --- !u!1 &741022736
 GameObject:
   m_ObjectHideFlags: 0
@@ -5102,7 +5091,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1143868250
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5500,7 +5489,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1502736596
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5517,8 +5506,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 77.105286, y: -65.352295}
-  m_SizeDelta: {x: 114, y: 90}
+  m_AnchoredPosition: {x: 94, y: -87}
+  m_SizeDelta: {x: 180, y: 157}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1502736597
 MonoBehaviour:
@@ -5839,7 +5828,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -154}
+  m_AnchoredPosition: {x: 0, y: -232}
   m_SizeDelta: {x: 900, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1567100779
@@ -6201,6 +6190,81 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &1610639396
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1610639399}
+  - component: {fileID: 1610639398}
+  - component: {fileID: 1610639397}
+  m_Layer: 5
+  m_Name: TituloImagen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1610639397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610639396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 355ececcbaae6014f9a5c78dc0a356ba, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1610639398
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610639396}
+  m_CullTransparentMesh: 1
+--- !u!224 &1610639399
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610639396}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 124507718}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -6.6715, y: 578.9795}
+  m_SizeDelta: {x: 1025.5756, y: 471.6547}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1654375319
 GameObject:
   m_ObjectHideFlags: 0
@@ -6908,7 +6972,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1772660167
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7268,7 +7332,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1829520215
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7285,8 +7349,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -60, y: -60}
-  m_SizeDelta: {x: 114, y: 90}
+  m_AnchoredPosition: {x: -85, y: -97}
+  m_SizeDelta: {x: 180, y: 157}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1829520216
 MonoBehaviour:
@@ -8059,7 +8123,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 728503688}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PanelSettingsManager, Assembly-CSharp
         m_MethodName: CambiarVolumenVoz
         m_Mode: 4

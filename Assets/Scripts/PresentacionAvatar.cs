@@ -143,21 +143,23 @@ public class PresentacionAvatar : MonoBehaviour
             yield break;
         }
 
+        videoPlayer.Stop();
         videoPlayer.clip = clip;
         videoPlayer.isLooping = false;
-        videoPlayer.Play();
 
+        // Preparar el video primero
+        videoPlayer.Prepare();
+        yield return new WaitUntil(() => videoPlayer.isPrepared);
+
+        // Reproducir
+        videoPlayer.Play();
         Debug.Log("Reproduciendo: " + clip.name
             + " | Duracion: " + clip.length + "s");
 
-        // Esperar a que el video esté preparado
-        yield return new WaitUntil(() => videoPlayer.isPrepared);
+        // Esperar la duración exacta del clip
+        yield return new WaitForSeconds((float)clip.length);
 
-        // Esperar a que termine
-        yield return new WaitUntil(() =>
-            !videoPlayer.isPlaying ||
-            videoPlayer.time >= clip.length - 0.1f);
-
+        videoPlayer.Stop();
         Debug.Log("Video terminado: " + clip.name);
     }
 
