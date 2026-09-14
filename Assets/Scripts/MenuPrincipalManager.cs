@@ -8,7 +8,7 @@ public class MenuPrincipalManager : MonoBehaviour
 {
     [Header("Elementos principales")]
     public Image ojoAnatomico;
-    public TMP_Text titulo;
+    public Image titulo;
     public GameObject btnTutorial;
     public GameObject btnEmpezar;
     public GameObject btnSalida;
