@@ -42,6 +42,36 @@ public class VoiceComanderManage : MonoBehaviour
         {
             StartCoroutine(VolverAlMenu());
         }
+        else if (comando.Contains("explotar") ||
+         comando.Contains("separar") ||
+         comando.Contains("capas"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.ExplotarVista();
+        }
+        else if (comando.Contains("reiniciar") ||
+                 comando.Contains("vista completa") ||
+                 comando.Contains("ver completo") ||
+                 comando.Contains("mostrar todo"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.ReiniciarModeloCompleto();
+        }
+
+
+        else if (comando.Contains("unir") ||
+                 comando.Contains("cerrar capas"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.UnirVista();
+        }
+        else if (comando.Contains("siguiente capa") ||
+                 comando.Contains("siguiente"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.MostrarSiguienteCapa();
+        }
+        else if (comando.Contains("capa anterior") ||
+                 comando.Contains("anterior"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.MostrarCapaAnterior();
+        }
         else if (comando.Contains("cerrar") || comando.Contains("menu"))
         {
             GameManager.instance.MainMenu();
@@ -51,6 +81,7 @@ public class VoiceComanderManage : MonoBehaviour
             FindAnyObjectByType<ARInteractionManager>().DeleteItem();
             GameManager.instance.MainMenu();
         }
+
         else if (comando.Contains("explica") || comando.Contains("información")
                  || comando.Contains("que es") || comando.Contains("qué es"))
             FindAnyObjectByType<ARMedicalAI>().AskAboutCurrentItem();

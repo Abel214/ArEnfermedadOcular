@@ -15,4 +15,7 @@ MonoBehaviour:
   itemName: Ojo Sano
   itemImage: {fileID: 21300000, guid: 35e51597113b9b34ab884c23c5956d4e, type: 3}
   itemDescription: Ojo sin enfermedad
-  item3DModel: {fileID: 3728774602504257460, guid: 7260153ebf431c94a8f4351eedfaae0f, type: 3}
+  item3DModel: {fileID: 486032108671068338, guid: 8a00e4b112b577048b75866ddd47d118, type: 3}
+  medicalContext: "\r\n    Informaci\xF3n detallada sobre esta enfermedad ocular.\r\n   
+    Incluye: s\xEDntomas, causas, tratamiento, partes del ojo afectadas.\r\n    "
+  isAnatomyView: 0
