@@ -48,6 +48,10 @@ public class TestExplodedView : MonoBehaviour
             vistaActual.MostrarCapaAnterior();
         y += alto + 10;
 
+        if (GUI.Button(new Rect(x, y, ancho, alto), "Reiniciar modelo"))
+            vistaActual.ReiniciarModeloCompleto();
+        y += alto + 10;
+
         GUI.Label(new Rect(x, y, 500, 60),
             "Explotado: " + vistaActual.EstaExplotado
             + "\nCapa actual: " + vistaActual.CapaActual);

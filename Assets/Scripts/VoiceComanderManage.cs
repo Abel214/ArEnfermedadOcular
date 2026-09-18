@@ -48,6 +48,15 @@ public class VoiceComanderManage : MonoBehaviour
         {
             FindAnyObjectByType<OjoExplodedView>()?.ExplotarVista();
         }
+        else if (comando.Contains("reiniciar") ||
+                 comando.Contains("vista completa") ||
+                 comando.Contains("ver completo") ||
+                 comando.Contains("mostrar todo"))
+        {
+            FindAnyObjectByType<OjoExplodedView>()?.ReiniciarModeloCompleto();
+        }
+
+
         else if (comando.Contains("unir") ||
                  comando.Contains("cerrar capas"))
         {
@@ -72,6 +81,7 @@ public class VoiceComanderManage : MonoBehaviour
             FindAnyObjectByType<ARInteractionManager>().DeleteItem();
             GameManager.instance.MainMenu();
         }
+
         else if (comando.Contains("explica") || comando.Contains("información")
                  || comando.Contains("que es") || comando.Contains("qué es"))
             FindAnyObjectByType<ARMedicalAI>().AskAboutCurrentItem();
