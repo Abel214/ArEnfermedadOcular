@@ -97,3 +97,15 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# VS Code directory & solution files
+.vscode/
+*.slnx
+
+# Android Native / IL2CPP intermediate build files
+.utmp/
+/[Aa]ssets/.utmp/
+
+# Unity Build artifacts & Burst debugging
+*_BurstDebugInformation_DoNotShip/
+*_BackUpThisFolder_ButDontShipItWithYourGame/
