@@ -116,7 +116,7 @@ public class MenuPrincipalManager : MonoBehaviour
         salida.OnComplete(() =>
         {
             
-            SceneManager.LoadScene("Interfaz");
+            SceneManager.LoadScene("InterfazModelosOjosCompletos");
         });
     }
 

@@ -15,4 +15,7 @@ MonoBehaviour:
   itemName: "Conjuntivitis Anatom\xEDa"
   itemImage: {fileID: 21300000, guid: 79ab22a3414ecfc4088f5d91c35ae98b, type: 3}
   itemDescription: Conjuntivitis bacteriana
-  item3DModel: {fileID: 5705718309545111889, guid: 5f2fc41a21902ee4c9748fe06ff810a5, type: 3}
+  item3DModel: {fileID: 2615156254172181020, guid: 463edd0637f921e40aac2d41682af741, type: 3}
+  medicalContext: "\r\n    Informaci\xF3n detallada sobre esta enfermedad ocular.\r\n   
+    Incluye: s\xEDntomas, causas, tratamiento, partes del ojo afectadas.\r\n    "
+  isAnatomyView: 0
