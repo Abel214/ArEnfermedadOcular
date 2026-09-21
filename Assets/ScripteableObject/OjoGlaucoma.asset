@@ -15,4 +15,7 @@ MonoBehaviour:
   itemName: Ojo Glaucoma
   itemImage: {fileID: 21300000, guid: 732ebd848c9c9f84b9c9fcf1ec62276c, type: 3}
   itemDescription: Ojo con glaucoma grave
-  item3DModel: {fileID: 5231172139898377379, guid: 41e83815d8b95594bb32d63c6519dc23, type: 3}
+  item3DModel: {fileID: 1783068993180063610, guid: 0349bdf6ddabde140a70e760c475d465, type: 3}
+  medicalContext: "\r\n    Informaci\xF3n detallada sobre esta enfermedad ocular.\r\n   
+    Incluye: s\xEDntomas, causas, tratamiento, partes del ojo afectadas.\r\n    "
+  isAnatomyView: 0
