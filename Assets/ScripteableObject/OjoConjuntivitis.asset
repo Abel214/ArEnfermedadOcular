@@ -15,4 +15,7 @@ MonoBehaviour:
   itemName: Ojo con Conjuntivitis
   itemImage: {fileID: 21300000, guid: 7a318843366684348831e8833af12404, type: 3}
   itemDescription: Conjuntivitis bacteriana
-  item3DModel: {fileID: 696184093100295402, guid: 9a7aad35521ff724b8ea673fccf454f1, type: 3}
+  item3DModel: {fileID: 2615156254172181020, guid: 463edd0637f921e40aac2d41682af741, type: 3}
+  medicalContext: "\r\n    Informaci\xF3n detallada sobre esta enfermedad ocular.\r\n   
+    Incluye: s\xEDntomas, causas, tratamiento, partes del ojo afectadas.\r\n    "
+  isAnatomyView: 0
