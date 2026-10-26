@@ -21,6 +21,7 @@ public class ARInteractionManager : MonoBehaviour
 
     [Header("Configuración de Rotación")]
     [SerializeField] private float rotationSensitivity = 1f; // Sensibilidad de rotación
+    [SerializeField] private float vozRotacionGrados = 30f;   // Grados que gira el modelo por cada comando de voz
 
     private ARRaycastManager aRRaycastManager;
     private List<ARRaycastHit> hits = new List<ARRaycastHit>();
@@ -59,7 +60,6 @@ public class ARInteractionManager : MonoBehaviour
     void Start()
     {
         aRRaycastManager = FindAnyObjectByType<ARRaycastManager>();
-        GameManager.instance.OnMainMenu += SetItemPosition;
     }
 
     void Update()
@@ -71,7 +71,7 @@ public class ARInteractionManager : MonoBehaviour
         {
             Vector2 middlePointScreen = new Vector2(Screen.width / 2, Screen.height / 2);
 
-            if (aRRaycastManager.Raycast(middlePointScreen, hits, TrackableType.Planes))
+            if (aRRaycastManager != null && aRRaycastManager.Raycast(middlePointScreen, hits, TrackableType.Planes))
             {
                 item3Dmodel.transform.position = hits[0].pose.position;
                 item3Dmodel.transform.rotation = hits[0].pose.rotation;
@@ -83,7 +83,7 @@ public class ARInteractionManager : MonoBehaviour
                 if (touch.phase == TouchPhase.Began && !IsTapOverUI(touch.screenPosition))
                 {
                     isPlacingMode = false;
-                    Debug.Log("Objeto colocado");
+                    Debug.Log("Objeto colocado temporalmente en el plano.");
                 }
             }
             return;
@@ -110,7 +110,8 @@ public class ARInteractionManager : MonoBehaviour
                     itemSelect = null;
                     isDragging = true;
                     lastTouchPosition = touchPosition;
-                    GameManager.instance.ArPosition();
+                    if (GameManager.instance != null)
+                        GameManager.instance.ArPosition();
                     Debug.Log("Objeto seleccionado: " + item3Dmodel.name);
                 }
             }
@@ -171,7 +172,7 @@ public class ARInteractionManager : MonoBehaviour
                 float deltaY = (touchPosition.y - lastTouchPosition.y) * verticalSensitivity;
 
                 // Mover en el plano XZ usando raycast
-                if (aRRaycastManager.Raycast(touchPosition, hits, TrackableType.Planes))
+                if (aRRaycastManager != null && aRRaycastManager.Raycast(touchPosition, hits, TrackableType.Planes))
                 {
                     Vector3 newPosition = hits[0].pose.position;
 
@@ -203,6 +204,7 @@ public class ARInteractionManager : MonoBehaviour
 
     public bool IsTapOverUI(Vector2 touchPosition)
     {
+        if (EventSystem.current == null) return false;
         PointerEventData eventData = new PointerEventData(EventSystem.current);
         eventData.position = touchPosition;
         List<RaycastResult> result = new List<RaycastResult>();
@@ -212,6 +214,7 @@ public class ARInteractionManager : MonoBehaviour
 
     private bool IsTapOver3DModel(Vector2 touchPosition)
     {
+        if (aRCamera == null) return false;
         Ray ray = aRCamera.ScreenPointToRay(touchPosition);
         if (Physics.Raycast(ray, out RaycastHit hit3DModel))
         {
@@ -228,10 +231,16 @@ public class ARInteractionManager : MonoBehaviour
     {
         if (item3Dmodel != null)
         {
-            item3Dmodel = null;
             isDragging = false;
             isPlacingMode = false;
-            Debug.Log("Posición confirmada");
+            
+            GameObject arPositionCanvasObj = GameObject.Find("ARPositionCanvas");
+            if (arPositionCanvasObj != null)
+            {
+                arPositionCanvasObj.SetActive(false);
+            }
+
+            Debug.Log("Posición del modelo aprobada y fijada correctamente en el entorno AR.");
         }
     }
 
@@ -244,19 +253,36 @@ public class ARInteractionManager : MonoBehaviour
         }
         isDragging = false;
         isPlacingMode = false;
-        GameManager.instance.MainMenu();
+
+        // Desplegar nuevamente el menú de ítems para elegir otro modelo
+        if (GameManager.instance != null)
+            GameManager.instance.ItemsMenu();
     }
+
+    // NUEVA FUNCIONALIDAD: Rotar el modelo mediante comandos de voz (Izquierda / Derecha)
+    public void RotarModeloPorVoz(float direccion)
+    {
+        if (item3Dmodel != null)
+        {
+            item3Dmodel.transform.Rotate(0, direccion * vozRotacionGrados, 0, Space.World);
+            Debug.Log("Rotando modelo fijado por voz: " + (direccion > 0 ? "Derecha" : "Izquierda"));
+        }
+        else
+        {
+            Debug.LogWarning("No hay ningún modelo activo para rotar por voz.");
+        }
+    }
+
     public void ColocarPorNombre(string nombre)
     {
-        // Buscar entre todos los botones generados
-        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>();
+        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>(FindObjectsSortMode.None);
         foreach (var boton in botones)
         {
-            // Buscar por el nombre del item que tiene asignado
             if (boton.GetItemName().ToLower().Contains(nombre.ToLower()))
             {
                 boton.Create3DModel();
-                GameManager.instance.ArPosition();
+                if (GameManager.instance != null)
+                    GameManager.instance.ArPosition();
                 return;
             }
         }
@@ -265,6 +291,6 @@ public class ARInteractionManager : MonoBehaviour
 
     public void EliminarModelo()
     {
-        DeleteItem(); // Ya tienes este método
+        DeleteItem();
     }
 }

@@ -8,7 +8,7 @@ public class AndroidVoiceRecognizer : MonoBehaviour
 
     private AndroidJavaObject speechRecognizer;
     private bool isListening = false;
-    private bool escuchaContinua = true; // ← nuevo
+    private bool sesionActiva = false; // Controla si el usuario activó la escucha manualmente
 
     void Awake()
     {
@@ -19,19 +19,24 @@ public class AndroidVoiceRecognizer : MonoBehaviour
 
     void Start()
     {
-        // Iniciar escucha automática al arrancar
-        Invoke("IniciarEscuchaContinua", 2f);
+        // El micrófono arranca apagado por defecto, esperando la interacción del usuario.
+        Debug.Log("=== AndroidVoiceRecognizer en espera de interacción del usuario ===");
     }
 
-    public void IniciarEscuchaContinua()
+    public void IniciarEscuchaManual()
     {
-        escuchaContinua = true;
+        sesionActiva = true;
         StartListening();
     }
 
-    public void DetenerEscuchaContinua()
+    public void DetenerEscuchaManual()
     {
-        escuchaContinua = false;
+        sesionActiva = false;
+        StopListeningNative();
+    }
+
+    private void StopListeningNative()
+    {
         speechRecognizer?.Call("stopListening");
         speechRecognizer?.Call("destroy");
         speechRecognizer = null;
@@ -40,9 +45,9 @@ public class AndroidVoiceRecognizer : MonoBehaviour
 
     public void StartListening()
     {
-        if (isListening) return;
+        if (!sesionActiva || isListening) return;
         isListening = true;
-        Debug.Log("=== INICIANDO ESCUCHA ===");
+        Debug.Log("=== INICIANDO ESCUCHA MANUAL ===");
 
         AndroidJavaClass unityPlayer =
             new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -53,7 +58,6 @@ public class AndroidVoiceRecognizer : MonoBehaviour
         {
             try
             {
-                // Destruir instancia anterior
                 speechRecognizer?.Call("destroy");
                 speechRecognizer = null;
 
@@ -80,14 +84,13 @@ public class AndroidVoiceRecognizer : MonoBehaviour
                     "android.speech.extra.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS", 1500);
 
                 speechRecognizer.Call("startListening", intent);
-                Debug.Log("Escuchando...");
+                Debug.Log("Escuchando activamente...");
             }
             catch (System.Exception e)
             {
                 Debug.LogError("Error: " + e.Message);
                 isListening = false;
-                // Reintentar si es continua
-                if (escuchaContinua)
+                if (sesionActiva)
                     UnityMainThreadDispatcher.Instance()
                         .Enqueue(() => Invoke("StartListening", 1f));
             }
@@ -97,58 +100,44 @@ public class AndroidVoiceRecognizer : MonoBehaviour
     public void OnResultReceived(string text)
     {
         isListening = false;
-        Debug.Log("✅ Comando: " + text);
+        Debug.Log("✅ Comando reconocido: " + text);
         OnCommandRecognized?.Invoke(text.ToLower().Trim());
 
-        // Reiniciar escucha automáticamente
-        if (escuchaContinua)
+        // Si la sesión sigue activa por el usuario, vuelve a escuchar para el siguiente comando
+        if (sesionActiva)
             UnityMainThreadDispatcher.Instance()
-                .Enqueue(() => Invoke("StartListening", 0.8f));
+                .Enqueue(() => Invoke("StartListening", 0.5f));
     }
 
     public void OnErrorReceived(int errorCode)
     {
         isListening = false;
-        Debug.LogWarning("Error: " + errorCode);
+        Debug.LogWarning("Error de reconocimiento: " + errorCode);
 
-        // Reiniciar en errores recuperables
-        if (escuchaContinua && errorCode != 9) // 9 = sin permiso
+        // Reintentar si el usuario mantiene la sesión activa y no es error de permisos
+        if (sesionActiva && errorCode != 9)
             UnityMainThreadDispatcher.Instance()
                 .Enqueue(() => Invoke("StartListening", 1f));
     }
 
-    // El botón ahora solo es indicador visual
-    public void BotonMicrofono()
-    {
-        if (isListening)
-        {
-            Debug.Log("Ya estoy escuchando...");
-            return;
-        }
-        StartListening();
-    }
-
     void OnDestroy()
     {
-        escuchaContinua = false;
-        speechRecognizer?.Call("destroy");
+        sesionActiva = false;
+        StopListeningNative();
     }
 
     void OnApplicationPause(bool pause)
     {
         if (pause)
         {
-            escuchaContinua = false;
-            speechRecognizer?.Call("stopListening");
-        }
-        else
-        {
-            escuchaContinua = true;
-            Invoke("StartListening", 1.5f);
+            StopListeningNative();
         }
     }
 }
 
+// ==========================================
+// CLASE AUXILIAR PARA ESCUCHAR EVENTOS NATIVOS
+// ==========================================
 public class SpeechListener : AndroidJavaProxy
 {
     private AndroidVoiceRecognizer recognizer;
@@ -178,10 +167,7 @@ public class SpeechListener : AndroidJavaProxy
             .Enqueue(() => recognizer.OnErrorReceived(error));
     }
 
-    public void onReadyForSpeech(AndroidJavaObject p)
-    {
-        Debug.Log("Listo para escuchar");
-    }
+    public void onReadyForSpeech(AndroidJavaObject p) { Debug.Log("Listo para escuchar"); }
     public void onBeginningOfSpeech() { }
     public void onRmsChanged(float r) { }
     public void onBufferReceived(AndroidJavaObject b) { }

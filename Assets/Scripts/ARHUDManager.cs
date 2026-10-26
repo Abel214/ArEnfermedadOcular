@@ -17,8 +17,8 @@ public class ARHUDManager : MonoBehaviour
 
     [Header("Estados del micrófono")]
     public Image imgMicrofono;
-    public Color colorIdle;      // blanco transparente
-    public Color colorEscuchando; // rojo/verde
+    public Color colorIdle;       // Color inicial / inactivo
+    public Color colorEscuchando; // Color activo / escuchando
 
     private bool modeloColocado = false;
     private Coroutine ocultarCoroutine;
@@ -27,31 +27,50 @@ public class ARHUDManager : MonoBehaviour
     {
         // Solo micrófono visible al inicio
         OcultarBotonesSecundarios(false);
-        textoGuia.DOFade(0.4f, 0.5f); // texto sutil
+        if (textoGuia != null)
+        {
+            textoGuia.DOFade(0.4f, 0.5f); // texto sutil
+        }
     }
 
     // ─── MICRÓFONO TOCADO ────────────────────────
     public void OnMicrofonoTocado()
     {
-        // Cambiar color a escuchando
-        imgMicrofono.DOColor(colorEscuchando, 0.2f);
-        textoGuia.DOFade(0f, 0.3f); // ocultar texto guía
+        // Cambiar color a escuchando si la imagen está asignada
+        if (imgMicrofono != null)
+        {
+            imgMicrofono.DOColor(colorEscuchando, 0.2f);
+        }
 
-        // Activar reconocimiento de voz
-        AndroidVoiceRecognizer.Instance.StartListening();
+        if (textoGuia != null)
+        {
+            textoGuia.DOFade(0f, 0.3f); // ocultar texto guía temporalmente
+        }
+
+        // CORREGIDO: Activar reconocimiento de voz manual sincronizado
+        if (AndroidVoiceRecognizer.Instance != null)
+        {
+            AndroidVoiceRecognizer.Instance.IniciarEscuchaManual();
+        }
     }
 
     // ─── CUANDO TERMINA DE ESCUCHAR ──────────────
     public void OnTerminoEscucha()
     {
-        imgMicrofono.DOColor(colorIdle, 0.3f);
+        if (imgMicrofono != null)
+        {
+            imgMicrofono.DOColor(colorIdle, 0.3f);
+        }
     }
 
     // ─── CUANDO SE COLOCA UN MODELO ──────────────
     public void OnModeloColocado()
     {
         modeloColocado = true;
-        textoGuia.DOFade(0f, 0.3f);
+        if (textoGuia != null)
+        {
+            textoGuia.DOFade(0f, 0.3f);
+        }
 
         // Mostrar botones secundarios brevemente
         MostrarBotonesSecundarios();
@@ -63,14 +82,23 @@ public class ARHUDManager : MonoBehaviour
         if (ocultarCoroutine != null)
             StopCoroutine(ocultarCoroutine);
 
-        btnEliminar.SetActive(true);
-        btnCaptura.SetActive(true);
-        if (!modeloColocado) btnVolver.SetActive(true);
+        if (btnEliminar != null)
+        {
+            btnEliminar.SetActive(true);
+            btnEliminar.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
+        }
 
-        btnEliminar.transform.DOScale(Vector3.one, 0.2f)
-            .SetEase(Ease.OutBack);
-        btnCaptura.transform.DOScale(Vector3.one, 0.2f)
-            .SetEase(Ease.OutBack);
+        if (btnCaptura != null)
+        {
+            btnCaptura.SetActive(true);
+            btnCaptura.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
+        }
+
+        if (btnVolver != null && !modeloColocado)
+        {
+            btnVolver.SetActive(true);
+            btnVolver.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
+        }
 
         // Ocultar después de 3 segundos sin interacción
         ocultarCoroutine = StartCoroutine(OcultarDespuesDeTiempo(3f));
@@ -86,18 +114,27 @@ public class ARHUDManager : MonoBehaviour
     {
         if (animar)
         {
-            btnEliminar.transform.DOScale(Vector3.zero, 0.2f)
-                .OnComplete(() => btnEliminar.SetActive(false));
-            btnCaptura.transform.DOScale(Vector3.zero, 0.2f)
-                .OnComplete(() => btnCaptura.SetActive(false));
-            btnVolver.transform.DOScale(Vector3.zero, 0.2f)
-                .OnComplete(() => btnVolver.SetActive(false));
+            if (btnEliminar != null && btnEliminar.activeSelf)
+            {
+                btnEliminar.transform.DOScale(Vector3.zero, 0.2f)
+                    .OnComplete(() => btnEliminar.SetActive(false));
+            }
+            if (btnCaptura != null && btnCaptura.activeSelf)
+            {
+                btnCaptura.transform.DOScale(Vector3.zero, 0.2f)
+                    .OnComplete(() => btnCaptura.SetActive(false));
+            }
+            if (btnVolver != null && btnVolver.activeSelf)
+            {
+                btnVolver.transform.DOScale(Vector3.zero, 0.2f)
+                    .OnComplete(() => btnVolver.SetActive(false));
+            }
         }
         else
         {
-            btnEliminar.SetActive(false);
-            btnCaptura.SetActive(false);
-            btnVolver.SetActive(false);
+            if (btnEliminar != null) btnEliminar.SetActive(false);
+            if (btnCaptura != null) btnCaptura.SetActive(false);
+            if (btnVolver != null) btnVolver.SetActive(false);
         }
     }
 
