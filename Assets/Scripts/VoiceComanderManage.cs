@@ -37,6 +37,18 @@ public class VoiceComanderManage : MonoBehaviour
             ColocarModeloPorNombre("glaucoma");
         else if (comando.Contains("sano") || comando.Contains("normal"))
             ColocarModeloPorNombre("sano");
+        
+        // NUEVOS COMANDOS DE ROTACIÓN POR VOZ (Izquierda / Derecha)
+        else if (comando.Contains("girar izquierda") || comando.Contains("izquierda"))
+        {
+            FindAnyObjectByType<ARInteractionManager>()?.RotarModeloPorVoz(-1f); // Negativo para girar a la izquierda
+        }
+        else if (comando.Contains("girar derecha") || comando.Contains("derecha"))
+        {
+            FindAnyObjectByType<ARInteractionManager>()?.RotarModeloPorVoz(1f);  // Positivo para girar a la derecha
+        }
+        // FIN DE NUEVOS COMANDOS
+
         else if (comando.Contains("volver") || comando.Contains("salir")
                  || comando.Contains("menu principal"))
         {
@@ -55,8 +67,6 @@ public class VoiceComanderManage : MonoBehaviour
         {
             FindAnyObjectByType<OjoExplodedView>()?.ReiniciarModeloCompleto();
         }
-
-
         else if (comando.Contains("unir") ||
                  comando.Contains("cerrar capas"))
         {
@@ -81,7 +91,6 @@ public class VoiceComanderManage : MonoBehaviour
             FindAnyObjectByType<ARInteractionManager>().DeleteItem();
             GameManager.instance.MainMenu();
         }
-
         else if (comando.Contains("explica") || comando.Contains("información")
                  || comando.Contains("que es") || comando.Contains("qué es"))
             FindAnyObjectByType<ARMedicalAI>().AskAboutCurrentItem();
@@ -97,9 +106,8 @@ public class VoiceComanderManage : MonoBehaviour
     {
         Debug.Log("Volviendo al menú principal...");
 
-        // Detener escucha continua antes de cambiar escena
         if (AndroidVoiceRecognizer.Instance != null)
-            AndroidVoiceRecognizer.Instance.DetenerEscuchaContinua();
+            AndroidVoiceRecognizer.Instance.DetenerEscuchaManual();
 
         yield return new WaitForSeconds(0.5f);
 
@@ -108,7 +116,7 @@ public class VoiceComanderManage : MonoBehaviour
 
     void ColocarModeloPorNombre(string nombre)
     {
-        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>();
+        ItemButtonManager[] botones = FindObjectsByType<ItemButtonManager>(FindObjectsSortMode.None);
         foreach (var boton in botones)
         {
             if (boton.name.ToLower().Contains(nombre))
@@ -124,12 +132,12 @@ public class VoiceComanderManage : MonoBehaviour
     public void BotonMicrofono()
     {
         if (micIcon) micIcon.SetActive(true);
-        AndroidVoiceRecognizer.Instance.StartListening();
+        if (AndroidVoiceRecognizer.Instance != null)
+            AndroidVoiceRecognizer.Instance.IniciarEscuchaManual();
     }
 
     void OnDestroy()
     {
-        if (AndroidVoiceRecognizer.Instance != null)
-            AndroidVoiceRecognizer.Instance.OnCommandRecognized -= ProcesarComando;
+        AndroidVoiceRecognizer.Instance.OnCommandRecognized -= ProcesarComando;
     }
 }
