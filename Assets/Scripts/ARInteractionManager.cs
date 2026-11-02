@@ -23,6 +23,11 @@ public class ARInteractionManager : MonoBehaviour
     [SerializeField] private float rotationSensitivity = 1f; // Sensibilidad de rotación
     [SerializeField] private float vozRotacionGrados = 30f;   // Grados que gira el modelo por cada comando de voz
 
+    [Header("Configuración de Colocación")]
+    [SerializeField] private float alturaSobrePlano = 0.15f;   // flota sobre el plano
+    [SerializeField] private float distanciaSinPlano = 0.8f;   // si no hay plano, a 80 cm de la cámara
+    [SerializeField] private float offsetFrenteY = 0f;         // ajusta 0, 90, 180 o 270 según el frente de tu modelo
+
     private ARRaycastManager aRRaycastManager;
     private List<ARRaycastHit> hits = new List<ARRaycastHit>();
     private GameObject item3Dmodel;
@@ -70,12 +75,21 @@ public class ARInteractionManager : MonoBehaviour
         if (isPlacingMode && item3Dmodel != null)
         {
             Vector2 middlePointScreen = new Vector2(Screen.width / 2, Screen.height / 2);
+            Transform cam = aRCamera != null ? aRCamera.transform : Camera.main.transform;
 
+            Vector3 pos;
             if (aRRaycastManager != null && aRRaycastManager.Raycast(middlePointScreen, hits, TrackableType.Planes))
-            {
-                item3Dmodel.transform.position = hits[0].pose.position;
-                item3Dmodel.transform.rotation = hits[0].pose.rotation;
-            }
+                pos = hits[0].pose.position + Vector3.up * alturaSobrePlano;
+            else
+                pos = cam.position + cam.forward * distanciaSinPlano; // fallback delante de la cámara
+
+            item3Dmodel.transform.position = pos;
+
+            // Orientar el frente del modelo hacia la cámara (solo eje Y)
+            Vector3 dir = cam.position - pos;
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0.0001f)
+                item3Dmodel.transform.rotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0f, offsetFrenteY, 0f);
 
             if (Touch.activeFingers.Count > 0)
             {
