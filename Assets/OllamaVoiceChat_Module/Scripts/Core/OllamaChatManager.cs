@@ -86,7 +86,7 @@ namespace OllamaIntegration
         public IReadOnlyList<OllamaMessage> History => conversationHistory.AsReadOnly();
         public string ModelName => modelName;
         public ChatProviderType Provider => provider;
-        public string ProviderDisplayName => provider == ChatProviderType.Gemini ? "Gemini · Nube" : "Ollama · Local";
+        public string ProviderDisplayName => provider == ChatProviderType.Gemini ? "Gemini" : "Ollama Gemma 4";
         public string ModelLabel => provider == ChatProviderType.Gemini ? geminiModel : modelName;
 
         /// <summary>

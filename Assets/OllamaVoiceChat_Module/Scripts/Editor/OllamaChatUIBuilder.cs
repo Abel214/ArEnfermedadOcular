@@ -199,7 +199,7 @@ namespace OllamaEditor
             titleRect.offsetMin = new Vector2(25f, 0f);
             titleRect.offsetMax = new Vector2(-10f, 0f);
             var titleTMP = titleObj.GetComponent<TextMeshProUGUI>();
-            titleTMP.text = "<b>Asistente ocular</b> <size=70%><color=#4DD0E1>(Salud visual)</color></size>";
+            titleTMP.text = "<b>Asistencia ocular</b>";
             titleTMP.fontSize = 32;
             titleTMP.color = Color.white;
             titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
@@ -555,7 +555,10 @@ namespace OllamaEditor
             bgRect.anchorMin = Vector2.zero;
             bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
-            bgObj.GetComponent<Image>().color = new Color(0.07f, 0.12f, 0.18f, 1f);
+            var bgImg = bgObj.GetComponent<Image>();
+            bgImg.color = new Color(0.07f, 0.12f, 0.18f, 1f);
+            var itemToggle = itemObj.GetComponent<Toggle>();
+            itemToggle.targetGraphic = bgImg;
 
             GameObject checkObj = new GameObject("Item Checkmark", typeof(RectTransform), typeof(Image));
             checkObj.transform.SetParent(itemObj.transform, false);
@@ -565,7 +568,23 @@ namespace OllamaEditor
             checkRect.pivot = new Vector2(0.5f, 0.5f);
             checkRect.anchoredPosition = new Vector2(28f, 0f);
             checkRect.sizeDelta = new Vector2(28f, 28f);
-            checkObj.GetComponent<Image>().color = new Color(0.0f, 0.85f, 0.9f, 1f);
+            var checkImg = checkObj.GetComponent<Image>();
+            checkImg.color = new Color(0f, 0f, 0f, 0f);
+            checkImg.raycastTarget = false;
+
+            GameObject checkTextObj = new GameObject("Check", typeof(RectTransform), typeof(TextMeshProUGUI));
+            checkTextObj.transform.SetParent(checkObj.transform, false);
+            var checkTextRect = checkTextObj.GetComponent<RectTransform>();
+            checkTextRect.anchorMin = Vector2.zero;
+            checkTextRect.anchorMax = Vector2.one;
+            checkTextRect.sizeDelta = Vector2.zero;
+            var checkTMP = checkTextObj.GetComponent<TextMeshProUGUI>();
+            checkTMP.text = "\u2713";
+            checkTMP.fontSize = 26;
+            checkTMP.color = new Color(0.0f, 0.85f, 0.9f, 1f);
+            checkTMP.alignment = TextAlignmentOptions.Center;
+            if (font != null) checkTMP.font = font;
+
 
             GameObject itemLabelObj = new GameObject("Item Label", typeof(RectTransform), typeof(TextMeshProUGUI));
             itemLabelObj.transform.SetParent(itemObj.transform, false);
@@ -580,12 +599,13 @@ namespace OllamaEditor
             itemLabelTMP.alignment = TextAlignmentOptions.MidlineLeft;
             if (font != null) itemLabelTMP.font = font;
 
+            itemToggle.graphic = checkTMP;
             dropdown.template = templateRect;
             dropdown.itemText = itemLabelTMP;
             templateObj.SetActive(false);
 
             dropdown.ClearOptions();
-            dropdown.AddOptions(new List<string> { "Ollama · Local", "Gemini · Nube" });
+            dropdown.AddOptions(new List<string> { "Ollama Gemma 4", "Gemini" });
             dropdown.value = 0;
             dropdown.RefreshShownValue();
 

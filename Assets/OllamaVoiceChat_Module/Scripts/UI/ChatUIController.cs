@@ -331,7 +331,7 @@ namespace OllamaUI
                 br.anchorMax = new Vector2(1f, 0.5f);
                 br.pivot = new Vector2(1f, 0.5f);
                 br.anchoredPosition = new Vector2(-224f, 0f);
-                br.sizeDelta = new Vector2(76f, 58f);
+                br.sizeDelta = new Vector2(100f, 65f);
                 btn.GetComponent<Button>().onClick.AddListener(OpenKeyPanel);
             }
 
@@ -579,10 +579,63 @@ namespace OllamaUI
                 providerDropdown.ClearOptions();
                 providerDropdown.AddOptions(new List<string>
                 {
-                    "Ollama · Local",
-                    "Gemini · Nube"
+                    "Ollama Gemma 4",
+                    "Gemini"
                 });
-                providerDropdown.SetValueWithoutNotify((int)chatManager.Provider);
+
+                // Asegura que el elemento seleccionado muestre una marca visible,
+                // no solo el cuadro celeste vacío del template.
+                 var checkTransform = providerDropdown.transform.Find("Template/Viewport/Content/Item/Item Checkmark");
+                 if (checkTransform != null)
+                 {
+                     var existingText = checkTransform.GetComponent<TMP_Text>();
+                     if (existingText != null)
+                     {
+                         existingText.text = "\u2713";
+                         existingText.fontSize = 24;
+                         existingText.color = new Color(0.0f, 0.85f, 0.9f, 1f);
+                         existingText.alignment = TextAlignmentOptions.Center;
+                         if (appFont != null) existingText.font = appFont;
+                     }
+                     else
+                     {
+                         var checkImage = checkTransform.GetComponent<Image>();
+                         if (checkImage != null)
+                         {
+                             checkImage.color = new Color(0f, 0f, 0f, 0f);
+                             checkImage.raycastTarget = false;
+                         }
+
+                         if (checkTransform.Find("Check") == null)
+                         {
+                             var checkTextObj = new GameObject("Check", typeof(RectTransform), typeof(TextMeshProUGUI));
+                             checkTextObj.transform.SetParent(checkTransform, false);
+                             var checkTextRect = checkTextObj.GetComponent<RectTransform>();
+                             checkTextRect.anchorMin = Vector2.zero;
+                             checkTextRect.anchorMax = Vector2.one;
+                             checkTextRect.offsetMin = Vector2.zero;
+                             checkTextRect.offsetMax = Vector2.zero;
+                             var checkText = checkTextObj.GetComponent<TextMeshProUGUI>();
+                             checkText.text = "\u2713";
+                             checkText.fontSize = 24;
+                             checkText.color = new Color(0.0f, 0.85f, 0.9f, 1f);
+                             checkText.alignment = TextAlignmentOptions.Center;
+                             if (appFont != null) checkText.font = appFont;
+
+                             var itemToggle = checkTransform.parent.GetComponent<Toggle>();
+                             if (itemToggle != null) itemToggle.graphic = checkText;
+                         }
+                     }
+
+                     var itemToggle2 = checkTransform.parent.GetComponent<Toggle>();
+                     if (itemToggle2 != null)
+                     {
+                         var tmpText = checkTransform.GetComponent<TMP_Text>();
+                         if (tmpText != null) itemToggle2.graphic = tmpText;
+                     }
+                 }
+
+providerDropdown.SetValueWithoutNotify((int)chatManager.Provider);
                 providerDropdown.RefreshShownValue();
             }
             finally
@@ -646,9 +699,8 @@ namespace OllamaUI
 
         private void RefreshTitle()
         {
-            if (titleText == null || chatManager == null) return;
-            string subject = chatManager.ActiveModelName ?? "Salud visual";
-            titleText.text = $"<b>Asistente ocular</b> <size=70%><color=#4DD0E1>({subject})</color></size>";
+            if (titleText == null) return;
+            titleText.text = "<b>Asistencia ocular</b>";
         }
 
         // ── Burbujas (ancho según texto, máx 80% del contenido) ──
