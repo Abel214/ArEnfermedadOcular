@@ -50,5 +50,11 @@ public class ItemButtonManager : MonoBehaviour
         {
             medicalAI.SetCurrentItem(itemData, instance);
         }
+
+        // Modelo activo para el chat contextual (Ollama/Gemini)
+        if (interactionManager != null && itemData != null)
+        {
+            interactionManager.SetActiveItem(itemData, instance);
+        }
     }
 }

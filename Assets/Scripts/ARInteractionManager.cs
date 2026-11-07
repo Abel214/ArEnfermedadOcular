@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -50,6 +51,25 @@ public class ARInteractionManager : MonoBehaviour
             isPlacingMode = true;
             FindAnyObjectByType<ModeloHelpText>()?.MostrarTexto();
         }
+    }
+
+    /// <summary>
+    /// Modelo médico activo (vista externa o anatomía) y evento de cambio.
+    /// Lo usa el chat para contextualizar sus respuestas.
+    /// </summary>
+    public Item ActiveItem { get; private set; }
+    public event Action<Item> ActiveItemChanged;
+
+    public void SetActiveItem(Item item, GameObject instance)
+    {
+        ActiveItem = item;
+        ActiveItemChanged?.Invoke(item);
+    }
+
+    public void ClearActiveItem()
+    {
+        ActiveItem = null;
+        ActiveItemChanged?.Invoke(null);
     }
 
     void OnEnable()
@@ -267,6 +287,7 @@ public class ARInteractionManager : MonoBehaviour
         }
         isDragging = false;
         isPlacingMode = false;
+        ClearActiveItem();
 
         // Desplegar nuevamente el menú de ítems para elegir otro modelo
         if (GameManager.instance != null)

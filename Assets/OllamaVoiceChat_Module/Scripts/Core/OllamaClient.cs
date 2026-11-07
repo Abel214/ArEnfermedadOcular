@@ -42,7 +42,7 @@ namespace OllamaIntegration
                 }
                 catch (OperationCanceledException)
                 {
-                    throw new Exception("La petición a Ollama fue cancelada.");
+                    throw new ChatRequestCancelledException("La petición a Ollama fue cancelada.");
                 }
 
                 if (request.result == UnityWebRequest.Result.ConnectionError)

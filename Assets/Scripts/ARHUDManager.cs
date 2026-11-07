@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 using System.Collections;
+using UnityEngine.InputSystem.EnhancedTouch;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class ARHUDManager : MonoBehaviour
 {
@@ -141,9 +143,9 @@ public class ARHUDManager : MonoBehaviour
     // ─── TOQUE EN PANTALLA → mostrar botones ─────
     void Update()
     {
-        if (Input.touchCount > 0 && modeloColocado)
+        if (modeloColocado && Touch.activeFingers.Count > 0)
         {
-            if (Input.GetTouch(0).phase == TouchPhase.Began)
+            if (Touch.activeFingers[0].currentTouch.phase == UnityEngine.InputSystem.TouchPhase.Began)
                 MostrarBotonesSecundarios();
         }
     }

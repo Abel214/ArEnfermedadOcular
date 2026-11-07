@@ -21,6 +21,11 @@ namespace OllamaVoice
         [SerializeField] private Image micButtonImage;
         [SerializeField] private TMPro.TMP_Text micButtonText;
 
+        [Header("Iconos del Micrófono")]
+        [SerializeField] private UnityEngine.UI.Image glyphImage;
+        [SerializeField] private Sprite micIdleSprite;
+        [SerializeField] private Sprite micRecordingSprite;
+
         [Header("Colores de Estado")]
         [SerializeField] private Color idleColor = new Color(0.23f, 0.49f, 0.95f, 1f); // Azul
         [SerializeField] private Color recordingColor = new Color(0.90f, 0.22f, 0.21f, 1f); // Rojo
@@ -33,17 +38,13 @@ namespace OllamaVoice
             if (micRecorder == null) micRecorder = GetComponent<MicRecorder>() ?? gameObject.AddComponent<MicRecorder>();
             if (sttService == null) sttService = GetComponent<SpeechToTextService>() ?? gameObject.AddComponent<SpeechToTextService>();
             if (ttsService == null) ttsService = GetComponent<TextToSpeechService>() ?? gameObject.AddComponent<TextToSpeechService>();
-            if (chatManager == null) chatManager = FindFirstObjectByType<OllamaChatManager>();
-            if (uiController == null) uiController = FindFirstObjectByType<ChatUIController>();
+            if (chatManager == null) chatManager = FindAnyObjectByType<OllamaChatManager>(FindObjectsInactive.Include);
+            if (uiController == null) uiController = FindAnyObjectByType<ChatUIController>(FindObjectsInactive.Include);
         }
 
         private void OnEnable()
         {
-            if (micButton != null)
-            {
-                micButton.onClick.AddListener(ToggleRecording);
-            }
-
+            // El botón de micrófono usa HoldToTalkButton (mantener presionado para hablar).
             if (chatManager != null)
             {
                 chatManager.ResponseReceived += HandleAssistantResponse;
@@ -55,14 +56,14 @@ namespace OllamaVoice
                 ttsService.OnSpeechFinished += HandleSpeechFinished;
             }
 
-            SetButtonVisuals(idleColor, "Voz");
+            SetButtonVisuals(idleColor, null);
         }
 
         private void Start()
         {
             if (chatManager == null)
             {
-                chatManager = FindFirstObjectByType<OllamaChatManager>();
+                chatManager = FindAnyObjectByType<OllamaChatManager>(FindObjectsInactive.Include);
                 if (chatManager != null)
                 {
                     chatManager.ResponseReceived -= HandleAssistantResponse;
@@ -80,11 +81,6 @@ namespace OllamaVoice
 
         private void OnDisable()
         {
-            if (micButton != null)
-            {
-                micButton.onClick.RemoveListener(ToggleRecording);
-            }
-
             if (chatManager != null)
             {
                 chatManager.ResponseReceived -= HandleAssistantResponse;
@@ -108,9 +104,9 @@ namespace OllamaVoice
         }
 
         /// <summary>
-        /// Inicia o detiene la grabación de voz por micrófono.
+        /// Mantener presionado para hablar. Se llama al presionar el botón del micrófono.
         /// </summary>
-        public void ToggleRecording()
+        public void StartHoldRecording()
         {
             if (isProcessing)
             {
@@ -118,14 +114,48 @@ namespace OllamaVoice
                 return;
             }
 
-            if (micRecorder.IsRecording)
+            if (micRecorder != null && micRecorder.IsRecording) return;
+
+            StartRecording();
+        }
+
+        /// <summary>
+        /// Se llama al soltar el botón: detiene la grabación y envía a transcribir.
+        /// </summary>
+        public void ReleaseHoldAndSend()
+        {
+            if (micRecorder == null || !micRecorder.IsRecording)
             {
-                StopRecordingAndProcess();
+                ResetToIdleState("Listo");
+                return;
             }
-            else
+
+            StopRecordingAndProcess();
+        }
+
+        /// <summary>
+        /// Se llama si el dedo sale del botón: descarta la grabación sin enviar.
+        /// </summary>
+        public void CancelHold()
+        {
+            if (micRecorder != null && micRecorder.IsRecording)
             {
-                StartRecording();
+                micRecorder.StopRecording();
             }
+            ResetToIdleState("Grabación cancelada.");
+        }
+
+        /// <summary>
+        /// Reproduce un texto por TTS (botón de re-escuchar en cada burbuja).
+        /// </summary>
+        public void SpeakText(string text)
+        {
+            if (ttsService == null || string.IsNullOrWhiteSpace(text)) return;
+            if (ttsService.IsSpeaking)
+            {
+                ttsService.Stop();
+            }
+            ttsService.Speak(text);
         }
 
         private void StartRecording()
@@ -139,10 +169,10 @@ namespace OllamaVoice
             bool started = micRecorder.StartRecording();
             if (started)
             {
-                SetButtonVisuals(recordingColor, "Stop");
+                SetButtonVisuals(recordingColor, null);
                 if (uiController != null)
                 {
-                    uiController.SetStatusText("Escuchando... Habla ahora (Click para enviar)");
+                    uiController.SetStatusText("Escuchando… suelta para enviar");
                 }
             }
         }
@@ -150,7 +180,7 @@ namespace OllamaVoice
         private async void StopRecordingAndProcess()
         {
             isProcessing = true;
-            SetButtonVisuals(processingColor, "...");
+            SetButtonVisuals(processingColor, null);
 
             if (uiController != null)
             {
@@ -175,7 +205,7 @@ namespace OllamaVoice
                 return;
             }
 
-            ResetToIdleState("Enviando a Gemma...");
+            ResetToIdleState("Enviando al asistente...");
 
             // Enviar mensaje transcrito al flujo del chat
             if (chatManager != null)
@@ -186,7 +216,7 @@ namespace OllamaVoice
 
         private void HandleAssistantResponse(string responseText)
         {
-            // Reproducir la respuesta de Gemma automáticamente por TTS
+            // Reproducir la respuesta del asistente automáticamente por TTS
             if (ttsService != null && !string.IsNullOrWhiteSpace(responseText))
             {
                 ttsService.Speak(responseText);
@@ -197,7 +227,7 @@ namespace OllamaVoice
         {
             if (uiController != null)
             {
-                uiController.SetStatusText("Gemma está hablando...");
+                uiController.SetStatusText("El asistente está hablando...");
             }
         }
 
@@ -212,7 +242,7 @@ namespace OllamaVoice
         private void ResetToIdleState(string statusMessage = null)
         {
             isProcessing = false;
-            SetButtonVisuals(idleColor, "Voz");
+            SetButtonVisuals(idleColor, null);
 
             if (uiController != null && !string.IsNullOrEmpty(statusMessage))
             {
@@ -227,7 +257,12 @@ namespace OllamaVoice
                 micButtonImage.color = color;
             }
 
-            if (micButtonText != null)
+            if (glyphImage != null)
+            {
+                glyphImage.sprite = color == recordingColor ? micRecordingSprite : micIdleSprite;
+            }
+
+            if (micButtonText != null && label != null)
             {
                 micButtonText.text = label;
             }
@@ -241,7 +276,10 @@ namespace OllamaVoice
             ChatUIController ui,
             Button btn,
             Image btnImg,
-            TMPro.TMP_Text btnText)
+            TMPro.TMP_Text btnText,
+            UnityEngine.UI.Image glyph = null,
+            Sprite idleIcon = null,
+            Sprite recordingIcon = null)
         {
             micRecorder = recorder;
             sttService = stt;
@@ -251,6 +289,9 @@ namespace OllamaVoice
             micButton = btn;
             micButtonImage = btnImg;
             micButtonText = btnText;
+            glyphImage = glyph;
+            micIdleSprite = idleIcon;
+            micRecordingSprite = recordingIcon;
         }
     }
 }

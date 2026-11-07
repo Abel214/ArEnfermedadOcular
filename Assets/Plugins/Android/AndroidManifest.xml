@@ -12,7 +12,9 @@
     <uses-feature android:name="android.hardware.camera.ar" android:required="true" />
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
 
-    <application>
+    <!-- usesCleartextTraffic permite conectar Ollama en tu PC por Wi-Fi (http://IP:11434).
+         Si usas solo Gemini (HTTPS) puedes quitarlo. -->
+    <application android:usesCleartextTraffic="true">
         <meta-data android:name="com.google.ar.core" android:value="required" />
 
         <activity android:name="com.unity3d.player.UnityPlayerActivity"

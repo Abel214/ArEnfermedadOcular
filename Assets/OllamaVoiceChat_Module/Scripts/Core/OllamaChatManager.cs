@@ -10,6 +10,19 @@ namespace OllamaIntegration
 {
     public class OllamaChatManager : MonoBehaviour
     {
+        [Header("Proveedor de Chat")]
+        [Tooltip("Proveedor activo. El historial se conserva al cambiar entre Ollama y Gemini.")]
+        [SerializeField] private ChatProviderType provider = ChatProviderType.Ollama;
+
+        [Tooltip("Modelo de Gemini a usar cuando el proveedor es Gemini (ej. gemini-flash-latest)")]
+        [SerializeField] private string geminiModel = "gemini-flash-latest";
+
+        [Tooltip("Nombre de la variable de entorno que contiene la API key de Gemini. La clave nunca se guarda en el proyecto.")]
+        [SerializeField] private string geminiApiKeyEnvVar = "GEMINI_API_KEY";
+
+        [Tooltip("Máximo de tokens de salida por respuesta de Gemini")]
+        [SerializeField] private int geminiMaxOutputTokens = 1024;
+
         [Header("Configuración del Servidor Ollama")]
         [Tooltip("URL base de Ollama (por defecto http://127.0.0.1:11434)")]
         [SerializeField] private string baseUrl = "http://127.0.0.1:11434";
@@ -21,7 +34,7 @@ namespace OllamaIntegration
         [SerializeField] private int timeoutSeconds = 600;
 
         [Header("Instrucciones y Límites")]
-        [Tooltip("Instrucción inicial para guiar el comportamiento y formato de Gemma")]
+        [Tooltip("Instrucción inicial para guiar el comportamiento y formato del asistente")]
         [TextArea(3, 5)]
         [SerializeField] private string systemPrompt = "Eres un asistente médico experto en salud visual y anatomía ocular para una app educativa de Realidad Aumentada. Responde de forma concisa, clara, directa y estructurada (máximo 2 a 3 párrafos breves o viñetas), en español y sin usar emojis.";
 
@@ -47,7 +60,7 @@ namespace OllamaIntegration
 
         [Header("Prueba Rápida")]
         [SerializeField] private bool testOnStart = false;
-        [SerializeField] private string testPrompt = "Hola Gemma, confirma si estás funcionando correctamente.";
+        [SerializeField] private string testPrompt = "Hola, confirma si estás funcionando correctamente.";
 
         [Header("Eventos")]
         public UnityEvent<string> onMessageSent;
@@ -60,6 +73,10 @@ namespace OllamaIntegration
         public event Action<string> ResponseReceived;
         public event Action<string> ErrorReceived;
         public event Action<bool> BusyStateChanged;
+        public event Action<ChatProviderType> ProviderChanged;
+        public event Action<string> ActiveModelChanged;
+
+        private ARInteractionManager interactionManager;
 
         private readonly List<OllamaMessage> conversationHistory = new List<OllamaMessage>();
         private bool isBusy = false;
@@ -68,24 +85,80 @@ namespace OllamaIntegration
         public bool IsBusy => isBusy;
         public IReadOnlyList<OllamaMessage> History => conversationHistory.AsReadOnly();
         public string ModelName => modelName;
+        public ChatProviderType Provider => provider;
+        public string ProviderDisplayName => provider == ChatProviderType.Gemini ? "Gemini · Nube" : "Ollama · Local";
+        public string ModelLabel => provider == ChatProviderType.Gemini ? geminiModel : modelName;
+
+        /// <summary>
+        /// Cambia el proveedor activo. Solo permitido sin petición en curso.
+        /// El historial de la conversación se conserva.
+        /// </summary>
+        public bool SetProvider(ChatProviderType newProvider)
+        {
+            if (isBusy)
+            {
+                Debug.LogWarning("[OllamaChatManager] No se puede cambiar de proveedor durante una petición en curso.");
+                return false;
+            }
+
+            if (provider == newProvider) return true;
+
+            provider = newProvider;
+            Debug.Log($"[OllamaChatManager] Proveedor activo: {ProviderDisplayName} ({ModelLabel}). Historial conservado ({conversationHistory.Count} mensajes).");
+            ProviderChanged?.Invoke(provider);
+            return true;
+        }
 
         private void Start()
         {
+            interactionManager = UnityEngine.Object.FindAnyObjectByType<ARInteractionManager>(FindObjectsInactive.Include);
+            if (interactionManager != null)
+            {
+                interactionManager.ActiveItemChanged -= HandleActiveItemChanged;
+                interactionManager.ActiveItemChanged += HandleActiveItemChanged;
+            }
+
             if (testOnStart)
             {
                 SendUserMessage(testPrompt);
             }
         }
 
-        private void OnDestroy()
+        private void HandleActiveItemChanged(Item item)
         {
-            CancelCurrentRequest();
+            ActiveModelChanged?.Invoke(item != null ? item.itemName : null);
         }
 
         /// <summary>
-        /// Envía un mensaje de usuario a Ollama manteniendo el historial de la conversación.
+        /// Nombre del modelo ocular visible en AR (Glaucoma, Catarata…), o null si no hay ninguno.
         /// </summary>
-        public async void SendUserMessage(string userText)
+        public string ActiveModelName
+        {
+            get
+            {
+                if (interactionManager == null)
+                {
+                    interactionManager = UnityEngine.Object.FindAnyObjectByType<ARInteractionManager>(FindObjectsInactive.Include);
+                }
+                return interactionManager != null && interactionManager.ActiveItem != null
+                    ? interactionManager.ActiveItem.itemName
+                    : null;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            CancelCurrentRequest();
+            if (interactionManager != null)
+            {
+                interactionManager.ActiveItemChanged -= HandleActiveItemChanged;
+            }
+        }
+
+        /// <summary>
+        /// Envía un mensaje de usuario manteniendo el historial de la conversación.
+        /// </summary>
+        public void SendUserMessage(string userText)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -99,7 +172,7 @@ namespace OllamaIntegration
                 return;
             }
 
-            await SendUserMessageAsync(userText);
+            _ = SendUserMessageAsync(userText);
         }
 
         /// <summary>
@@ -111,15 +184,12 @@ namespace OllamaIntegration
 
             SetBusy(true);
             activeCts?.Dispose();
-            activeCts = new CancellationTokenSource();
+            var requestCts = new CancellationTokenSource();
+            activeCts = requestCts;
 
-            // Preparar lista con system prompt, historial reciente y el nuevo mensaje del usuario
+            // Preparar lista con system prompt (contextual al modelo visible), historial y mensaje nuevo
             var messagesToSend = new List<OllamaMessage>();
-
-            if (!string.IsNullOrWhiteSpace(systemPrompt))
-            {
-                messagesToSend.Add(new OllamaMessage("system", systemPrompt));
-            }
+            messagesToSend.Add(new OllamaMessage("system", BuildSystemPrompt()));
 
             // Incluir historial limitado a los últimos turnos para mantener alta velocidad
             int historyCount = conversationHistory.Count;
@@ -138,35 +208,13 @@ namespace OllamaIntegration
             MessageSent?.Invoke(userText);
             onMessageSent?.Invoke(userText);
 
-            int threadCount = Mathf.Clamp(SystemInfo.processorCount - 1, 2, 8);
-
-            var options = new OllamaChatOptions
-            {
-                NumCtx = contextLength,
-                Temperature = temperature,
-                NumPredict = maxPredictTokens,
-                NumThread = threadCount
-            };
-
-            if (forceCpu)
-            {
-                options.NumGpu = 0;
-            }
-
-            var request = new OllamaChatRequest
-            {
-                Model = modelName,
-                Messages = messagesToSend,
-                Stream = false,
-                Options = options
-            };
+            IChatProvider activeProvider = BuildActiveProvider();
 
             try
             {
-                Debug.Log($"[OllamaChatManager] Enviando mensaje a Ollama ({modelName})...");
-                var response = await OllamaClient.SendChatAsync(baseUrl, request, timeoutSeconds, activeCts.Token);
+                Debug.Log($"[OllamaChatManager] Enviando mensaje a {ProviderDisplayName} ({ModelLabel})...");
+                string responseText = await activeProvider.SendChatAsync(messagesToSend, requestCts.Token) ?? string.Empty;
 
-                string responseText = response?.Message?.Content ?? string.Empty;
                 if (stripEmojis && !string.IsNullOrEmpty(responseText))
                 {
                     responseText = StripEmojiText(responseText);
@@ -175,7 +223,7 @@ namespace OllamaIntegration
                 var assistantMsg = new OllamaMessage("assistant", responseText);
                 conversationHistory.Add(assistantMsg);
 
-                Debug.Log($"[OllamaChatManager] Respuesta recibida de {modelName}:\n{responseText}");
+                Debug.Log($"[OllamaChatManager] Respuesta recibida de {ModelLabel}:\n{responseText}");
                 ResponseReceived?.Invoke(responseText);
                 onResponseReceived?.Invoke(responseText);
 
@@ -183,14 +231,27 @@ namespace OllamaIntegration
             }
             catch (Exception ex)
             {
-                string errorMsg = ex.Message;
-                Debug.LogError($"[OllamaChatManager] Error al comunicarse con Ollama: {errorMsg}");
+                // Cancelaciones esperadas (petición reemplazada, app cerrada,
+                // tiempo agotado) no se muestran como error al usuario.
+                bool cancelled = ex is ChatRequestCancelledException
+                    || ex is OperationCanceledException
+                    || requestCts.IsCancellationRequested
+                    || ex.Message.IndexOf("cancelada", StringComparison.OrdinalIgnoreCase) >= 0;
 
                 // Si falló el envío, quitamos el último mensaje del usuario para no desfasar el historial
                 if (conversationHistory.Count > 0 && conversationHistory[conversationHistory.Count - 1] == userMsg)
                 {
                     conversationHistory.RemoveAt(conversationHistory.Count - 1);
                 }
+
+                if (cancelled)
+                {
+                    Debug.Log("[OllamaChatManager] Petición cancelada (sin mostrar mensaje al usuario).");
+                    return null;
+                }
+
+                string errorMsg = ex.Message;
+                Debug.LogError($"[OllamaChatManager] Error al comunicarse con {ProviderDisplayName}: {errorMsg}");
 
                 ErrorReceived?.Invoke(errorMsg);
                 onErrorReceived?.Invoke(errorMsg);
@@ -200,6 +261,60 @@ namespace OllamaIntegration
             {
                 SetBusy(false);
             }
+        }
+
+        /// <summary>
+        /// System prompt base + contexto del modelo ocular visible en AR.
+        /// Si el usuario pregunta qué está viendo, el asistente responde con ese nombre.
+        /// </summary>
+        private string BuildSystemPrompt()
+        {
+            var sb = new System.Text.StringBuilder();
+            if (!string.IsNullOrWhiteSpace(systemPrompt))
+            {
+                sb.Append(systemPrompt);
+            }
+
+            Item activeItem = interactionManager != null ? interactionManager.ActiveItem : null;
+            if (activeItem != null)
+            {
+                sb.Append($"\n\nContexto de la escena AR: el usuario está viendo el modelo '{activeItem.itemName}'.");
+                if (!string.IsNullOrWhiteSpace(activeItem.medicalContext))
+                {
+                    sb.Append($"\nInformación médica del modelo visible: {activeItem.medicalContext}");
+                }
+                sb.Append("\nSi te preguntan qué modelo están viendo, responde con ese nombre.");
+            }
+            else
+            {
+                sb.Append("\n\nEl usuario aún no ha colocado ningún modelo en la escena. Si te preguntan qué están viendo, diles que elijan un modelo primero.");
+            }
+
+            return sb.ToString();
+        }
+
+        private IChatProvider BuildActiveProvider()
+        {
+            if (provider == ChatProviderType.Gemini)
+            {
+                return new GeminiChatProvider(
+                    geminiModel,
+                    geminiApiKeyEnvVar,
+                    timeoutSeconds,
+                    geminiMaxOutputTokens,
+                    temperature);
+            }
+
+            int threadCount = Mathf.Clamp(SystemInfo.processorCount - 1, 2, 8);
+            return new OllamaChatProvider(
+                baseUrl,
+                modelName,
+                timeoutSeconds,
+                contextLength,
+                maxPredictTokens,
+                threadCount,
+                temperature,
+                forceCpu);
         }
 
         /// <summary>
@@ -232,17 +347,25 @@ namespace OllamaIntegration
             onBusyStateChanged?.Invoke(isBusy);
         }
 
-        [ContextMenu("Probar Conexión con Ollama")]
+        [ContextMenu("Probar Conexión con el Proveedor Activo")]
         public async void TestConnection()
         {
-            Debug.Log($"[OllamaChatManager] Verificando conexión con Ollama en {baseUrl}...");
+            Debug.Log($"[OllamaChatManager] Verificando conexión con {ProviderDisplayName}...");
             try
             {
-                var tags = await OllamaClient.GetTagsAsync(baseUrl);
-                string modelList = tags?.Models != null
-                    ? string.Join(", ", tags.Models.ConvertAll(m => m.Name))
-                    : "Ninguno";
-                Debug.Log($"[OllamaChatManager] ¡Conexión exitosa! Modelos disponibles: {modelList}");
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                {
+                    string info = await BuildActiveProvider().TestConnectionAsync(cts.Token);
+                    Debug.Log($"[OllamaChatManager] ¡Conexión exitosa! {ProviderDisplayName}: {info}");
+                }
+            }
+            catch (ChatRequestCancelledException)
+            {
+                Debug.Log("[OllamaChatManager] Prueba de conexión cancelada.");
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("[OllamaChatManager] Prueba de conexión cancelada por tiempo de espera.");
             }
             catch (Exception ex)
             {

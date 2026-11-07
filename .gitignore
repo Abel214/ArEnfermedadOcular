@@ -109,3 +109,26 @@ InitTestScene*.unity*
 # Unity Build artifacts & Burst debugging
 *_BurstDebugInformation_DoNotShip/
 *_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Credenciales locales (nunca subir claves)
+.env
+.env.*
+*.keystore
+*.jks
+*.p12
+*.pfx
+
+# Artefactos locales de build y archivos generados por Unity
+/[Aa]pks/
+/QCAR/
+/UIElementsSchema/
+/UpgradeLog*.htm
+/Temp.txt
+__pycache__/
+*.py[cod]
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
