@@ -166,6 +166,7 @@ namespace OllamaEditor
             Sprite recordOn = LoadIcon(IconRecord);
             Sprite volumeIcon = LoadIcon(IconVolume);
             Sprite sendIcon = LoadIcon(IconSend);
+            Sprite chatIcon = LoadIcon(IconBase + "Icon_PictoIcon_Chat.Png");
 
             // 2. Panel principal (arranca cerrado)
             GameObject panelObj = new GameObject("Ollama_Chat_Panel", typeof(RectTransform), typeof(Image));
@@ -385,15 +386,15 @@ namespace OllamaEditor
             sendRect.sizeDelta = new Vector2(96f, 96f);
             Round(sendBtnObj, 48f);
 
-            // 10. Botón flotante (solo texto legible)
-            GameObject toggleBtnObj = CreateButton(canvasObj.transform, "Ollama_Chat_Toggle_Button", "Chat", ToggleCyan, appFont, 30);
+            // 10. Botón flotante con icono (sin texto)
+            GameObject toggleBtnObj = CreateIconButton(canvasObj.transform, "Ollama_Chat_Toggle_Button", ToggleCyan, chatIcon, 64f, appFont, "Chat");
             var toggleRect = toggleBtnObj.GetComponent<RectTransform>();
             toggleRect.anchorMin = new Vector2(1f, 1f);
             toggleRect.anchorMax = new Vector2(1f, 1f);
             toggleRect.pivot = new Vector2(1f, 1f);
             toggleRect.anchoredPosition = new Vector2(-30f, -30f);
-            toggleRect.sizeDelta = new Vector2(190f, 90f);
-            Round(toggleBtnObj, 22f);
+            toggleRect.sizeDelta = new Vector2(90f, 90f);
+            Round(toggleBtnObj, 45f);
 
             // 11. Manager (se conserva si existe)
             GameObject managerObj = GameObject.Find("Ollama_Manager");
