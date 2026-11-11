@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "469086406929",
+    "project_id": "unityar-6fc21",
+    "storage_bucket": "unityar-6fc21.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:469086406929:android:e8c3692c986caed355e4b0",
+        "android_client_info": {
+          "package_name": "com.unity.template.ar_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3LiKQtV5nRjXu209P7H0hvqqYzpZwK1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
