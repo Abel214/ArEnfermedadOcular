@@ -252,9 +252,18 @@ public class ARInteractionManager : MonoBehaviour
         Ray ray = aRCamera.ScreenPointToRay(touchPosition);
         if (Physics.Raycast(ray, out RaycastHit hit3DModel))
         {
-            if (hit3DModel.transform.CompareTag("Item"))
+            // Subir hasta la raíz del modelo (el padre más alto con tag "Item")
+            Transform t = hit3DModel.transform;
+            Transform raiz = null;
+            while (t != null)
             {
-                itemSelect = hit3DModel.transform.gameObject;
+                if (t.CompareTag("Item")) raiz = t;
+                t = t.parent;
+            }
+
+            if (raiz != null)
+            {
+                itemSelect = raiz.gameObject;
                 return true;
             }
         }
@@ -267,7 +276,7 @@ public class ARInteractionManager : MonoBehaviour
         {
             isDragging = false;
             isPlacingMode = false;
-            
+
             GameObject arPositionCanvasObj = GameObject.Find("ARPositionCanvas");
             if (arPositionCanvasObj != null)
             {
@@ -282,14 +291,20 @@ public class ARInteractionManager : MonoBehaviour
     {
         if (item3Dmodel != null)
         {
-            Destroy(item3Dmodel);
+            // Asegurar que se destruye la raíz completa
+            Transform raiz = item3Dmodel.transform;
+            while (raiz.parent != null && raiz.parent.CompareTag("Item"))
+                raiz = raiz.parent;
+
+            Destroy(raiz.gameObject);
             item3Dmodel = null;
         }
+
+        itemSelect = null;
         isDragging = false;
         isPlacingMode = false;
         ClearActiveItem();
 
-        // Desplegar nuevamente el menú de ítems para elegir otro modelo
         if (GameManager.instance != null)
             GameManager.instance.ItemsMenu();
     }

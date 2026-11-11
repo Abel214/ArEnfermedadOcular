@@ -130,6 +130,19 @@ namespace OllamaVoice
                 return;
             }
 
+            // Toc (click muy corto): no procesar ni bloquear el botón,
+            // avisar el gesto correcto y volver al estado normal.
+            if (micRecorder.RecordingDuration < 0.5f)
+            {
+                micRecorder.StopRecording();
+                ResetToIdleState();
+                if (uiController != null)
+                {
+                    uiController.SetStatusText("Mantén presionado para hablar.");
+                }
+                return;
+            }
+
             StopRecordingAndProcess();
         }
 

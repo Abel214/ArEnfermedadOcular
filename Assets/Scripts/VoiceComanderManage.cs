@@ -37,7 +37,7 @@ public class VoiceComanderManage : MonoBehaviour
             ColocarModeloPorNombre("glaucoma");
         else if (comando.Contains("sano") || comando.Contains("normal"))
             ColocarModeloPorNombre("sano");
-        
+
         // NUEVOS COMANDOS DE ROTACIÓN POR VOZ (Izquierda / Derecha)
         else if (comando.Contains("girar izquierda") || comando.Contains("izquierda"))
         {
@@ -82,14 +82,23 @@ public class VoiceComanderManage : MonoBehaviour
         {
             FindAnyObjectByType<OjoExplodedView>()?.MostrarCapaAnterior();
         }
+        else if (comando.Contains("cerrar chat"))
+        {
+            CerrarChat();
+        }
+        else if (comando.Contains("abrir chat") || comando.Contains("chat")
+                 || comando.Contains("asistente"))
+        {
+            AbrirChat();
+        }
         else if (comando.Contains("cerrar") || comando.Contains("menu"))
         {
             GameManager.instance.MainMenu();
         }
         else if (comando.Contains("eliminar") || comando.Contains("borrar"))
         {
-            FindAnyObjectByType<ARInteractionManager>().DeleteItem();
-            GameManager.instance.MainMenu();
+            FindAnyObjectByType<ARInteractionManager>()?.DeleteItem();
+            return;
         }
         else if (comando.Contains("explica") || comando.Contains("información")
                  || comando.Contains("que es") || comando.Contains("qué es"))
@@ -100,6 +109,39 @@ public class VoiceComanderManage : MonoBehaviour
         else if (comando.Contains("tratamiento"))
             FindAnyObjectByType<ARMedicalAI>()
                 .AskAboutCurrentItem("¿Cuál es el tratamiento?");
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // COMANDO DE VOZ: ABRIR / CERRAR EL CHAT DEL ASISTENTE
+    // (Ollama_Chat_Canvas / Ollama_Chat_Panel)
+    // ═══════════════════════════════════════════════════════
+    void AbrirChat()
+    {
+        var chatUI = FindAnyObjectByType<OllamaUI.ChatUIController>(FindObjectsInactive.Include);
+        if (chatUI == null)
+        {
+            Debug.LogWarning("No se encontró Ollama_Chat_Canvas (ChatUIController).");
+            return;
+        }
+
+        chatUI.OpenChatPanel();
+
+        // Pausar la sesión de comandos de voz de la app: el SpeechRecognizer
+        // nativo mantiene el micrófono ocupado y así se bloquea la grabación
+        // del micrófono del chat (MicButton / Whisper).
+        if (AndroidVoiceRecognizer.Instance != null)
+            AndroidVoiceRecognizer.Instance.DetenerEscuchaManual();
+
+        Debug.Log("Chat del asistente abierto por comando de voz.");
+    }
+
+    void CerrarChat()
+    {
+        var chatUI = FindAnyObjectByType<OllamaUI.ChatUIController>(FindObjectsInactive.Include);
+        if (chatUI != null)
+            chatUI.CloseChatPanel();
+        else
+            Debug.LogWarning("No se encontró Ollama_Chat_Canvas (ChatUIController).");
     }
 
     IEnumerator VolverAlMenu()

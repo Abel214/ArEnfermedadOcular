@@ -36,6 +36,10 @@ namespace OllamaUI
         [SerializeField] private Sprite replayIcon;
         [SerializeField] private TMP_FontAsset appFont;
 
+        [Header("Panel de Clave Gemini")]
+        [Tooltip("Si está en OFF, el botón 'Clave' del chat se oculta y la app usa la clave de fábrica de GeminiKeyStore.")]
+        [SerializeField] private bool showKeyButton = false;
+
         // Panel de clave Gemini (se crea en tiempo de ejecución, no en la escena)
         private GameObject keyPanel;
         private TMP_InputField keyInput;
@@ -321,6 +325,10 @@ namespace OllamaUI
         {
             if (chatPanel == null || keyPanel != null) return;
 
+            // Con showKeyButton OFF (clave de fábrica) no se crea ni el botón
+            // ni el panel de configuración de la clave.
+            if (!showKeyButton) return;
+
             Transform header = chatPanel.transform.Find("Header");
             if (header != null)
             {
@@ -515,7 +523,10 @@ namespace OllamaUI
             if (chatManager.Provider != ChatProviderType.Gemini) return;
             if (GeminiKeyStore.HasKey) return;
 
-            UpdateStatus("Toca 'Clave' para configurar Gemini.");
+            if (showKeyButton)
+                UpdateStatus("Toca 'Clave' para configurar Gemini.");
+            else
+                UpdateStatus("Gemini no está configurado en esta instalación.");
         }
 
         private TMP_Text CreateLabel(Transform parent, string name, string text, float fontSize,
