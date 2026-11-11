@@ -118,6 +118,11 @@ InitTestScene*.unity*
 *.p12
 *.pfx
 
+# Archivo con API key de depuración (nunca subir)
+/[Aa]ssets/[Ss]cripts/DebugSecrets.cs
+/[Aa]ssets/[Ss]cripts/DebugSecrets.cs.meta
+
+
 # Artefactos locales de build y archivos generados por Unity
 /[Aa]pks/
 /QCAR/
