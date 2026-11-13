@@ -49,6 +49,11 @@ namespace OllamaUI
         private GameObject ttsStopButton;
         private TMP_Text ttsStopLabel;
 
+        // Botón de parada dentro de cada burbuja del asistente (junto al de
+        // reproducir). Solo se muestra en la burbuja que se está reproduciendo.
+        private readonly Dictionary<GameObject, GameObject> bubbleStopButtons = new Dictionary<GameObject, GameObject>();
+        private GameObject speakingBubble;
+
         // Panel de clave Gemini (se crea en tiempo de ejecución, no en la escena)
         private GameObject keyPanel;
         private TMP_InputField keyInput;
@@ -200,6 +205,8 @@ namespace OllamaUI
             }
 
             bubbles.Clear();
+            bubbleStopButtons.Clear();
+            speakingBubble = null;
         }
 
         private void OnDestroy()
@@ -237,6 +244,7 @@ namespace OllamaUI
         private void HandleTtsStateChanged()
         {
             UpdateTtsButtonVisual();
+            UpdateBubbleStopButtons();
         }
 
         private void CreateTtsStopButton()
@@ -419,6 +427,8 @@ namespace OllamaUI
                 if (b != null) Destroy(b);
             }
             bubbles.Clear();
+            bubbleStopButtons.Clear();
+            speakingBubble = null;
             AddAssistantBubble("Historial reiniciado. ¿En qué te ayudo?");
         }
 
@@ -904,6 +914,10 @@ providerDropdown.SetValueWithoutNotify((int)chatManager.Provider);
             if (row == null) return;
             AddBubbleText(bubble, text, TextAlignmentOptions.TopLeft);
             AddReplayButton(bubble, text);
+            AddStopVoiceButton(bubble);
+            // La respuesta recién creada es la que el asistente va a leer en voz
+            // alta a continuación: su botón de parada es el que debe aparecer.
+            speakingBubble = bubble;
             StartCoroutine(FitBubbleNextFrame(row, bubble, true));
             ScrollToBottom();
         }
@@ -945,9 +959,103 @@ providerDropdown.SetValueWithoutNotify((int)chatManager.Provider);
             string captured = text;
             replayObj.GetComponent<Button>().onClick.AddListener(() =>
             {
+                // Si el usuario re-reproduce una burbuja concreta, el botón de
+                // parada se muestra en esa burbuja.
+                speakingBubble = bubble;
                 var voice = FindAnyObjectByType<OllamaVoice.VoiceChatController>(FindObjectsInactive.Include);
                 if (voice != null) voice.SpeakText(captured);
             });
+        }
+
+        // ── Botón de parada de voz dentro de la burbuja ─────────
+        private void AddStopVoiceButton(GameObject bubble)
+        {
+            GameObject stopObj = new GameObject("StopVoice", typeof(RectTransform), typeof(Image), typeof(Button));
+            stopObj.transform.SetParent(bubble.transform, false);
+
+            var rect = stopObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(0f, 0f);
+            rect.pivot = new Vector2(0f, 0f);
+            // A la derecha del botón de reproducir (64 + separación).
+            rect.anchoredPosition = new Vector2(BubblePadX + 76f, BubblePadY);
+            rect.sizeDelta = new Vector2(64f, 64f);
+
+            var img = stopObj.GetComponent<Image>();
+            img.color = new Color(0.62f, 0.16f, 0.16f, 1f);
+            Round(stopObj, 32f);
+
+            // Icono de pausa: dos barras blancas (sin depender de sprites/fuentes).
+            CreatePauseBar(stopObj.transform, -9f);
+            CreatePauseBar(stopObj.transform, 9f);
+
+            var btn = stopObj.GetComponent<Button>();
+            btn.targetGraphic = img;
+            btn.onClick.AddListener(OnBubbleStopVoiceClicked);
+
+            stopObj.SetActive(false);
+            bubbleStopButtons[bubble] = stopObj;
+        }
+
+        private void CreatePauseBar(Transform parent, float xOffset)
+        {
+            GameObject bar = new GameObject("PauseBar", typeof(RectTransform), typeof(Image));
+            bar.transform.SetParent(parent, false);
+
+            var rect = bar.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(xOffset, 0f);
+            rect.sizeDelta = new Vector2(7f, 26f);
+
+            bar.GetComponent<Image>().color = Color.white;
+        }
+
+        private void OnBubbleStopVoiceClicked()
+        {
+            EnsureTtsService();
+            if (ttsService != null && ttsService.IsSpeaking)
+            {
+                ttsService.Stop();
+                UpdateStatus("Voz silenciada");
+            }
+            else
+            {
+                UpdateStatus("Listo");
+            }
+
+            UpdateBubbleStopButtons();
+        }
+
+        /// <summary>
+        /// Muestra el botón de parada solo en la burbuja que se está
+        /// reproduciendo y lo oculta en el resto (y cuando no hay voz).
+        /// </summary>
+        private void UpdateBubbleStopButtons()
+        {
+            bool speaking = ttsService != null && ttsService.IsSpeaking;
+
+            List<GameObject> stale = null;
+            foreach (var kv in bubbleStopButtons)
+            {
+                if (kv.Key == null || kv.Value == null)
+                {
+                    if (stale == null) stale = new List<GameObject>();
+                    stale.Add(kv.Key);
+                    continue;
+                }
+
+                bool visible = speaking && kv.Key == speakingBubble;
+                if (kv.Value.activeSelf != visible)
+                    kv.Value.SetActive(visible);
+            }
+
+            if (stale != null)
+            {
+                foreach (var key in stale)
+                    bubbleStopButtons.Remove(key);
+            }
         }
 
         private IEnumerator FitBubbleNextFrame(GameObject row, GameObject bubble, bool hasReplay)

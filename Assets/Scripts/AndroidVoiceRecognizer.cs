@@ -9,6 +9,7 @@ public class AndroidVoiceRecognizer : MonoBehaviour
     private AndroidJavaObject speechRecognizer;
     private bool isListening = false;
     private bool sesionActiva = false; // Controla si el usuario activó la escucha manualmente
+    private bool avisoEditorMostrado = false;
 
     void Awake()
     {
@@ -46,6 +47,19 @@ public class AndroidVoiceRecognizer : MonoBehaviour
     public void StartListening()
     {
         if (!sesionActiva || isListening) return;
+
+#if !UNITY_ANDROID || UNITY_EDITOR
+        // El SpeechRecognizer nativo solo existe en el dispositivo Android.
+        // En el Editor (o en escritorio) no hay currentActivity y AndroidJNI
+        // lanza "Field currentActivity ... not found".
+        if (!avisoEditorMostrado)
+        {
+            Debug.Log("[AndroidVoiceRecognizer] Reconocimiento nativo omitido: solo funciona en Android.");
+            avisoEditorMostrado = true;
+        }
+        return;
+#endif
+
         isListening = true;
         Debug.Log("=== INICIANDO ESCUCHA MANUAL ===");
 

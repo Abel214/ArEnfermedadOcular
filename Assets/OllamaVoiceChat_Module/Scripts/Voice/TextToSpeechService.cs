@@ -51,13 +51,19 @@ namespace OllamaVoice
             Stop();
 
             isSpeaking = true;
-            OnSpeechStarted?.Invoke();
+            // Un suscriptor defectuoso no debe abortar la reproducción de voz.
+            try { OnSpeechStarted?.Invoke(); }
+            catch (Exception ex) { Debug.LogWarning($"[TextToSpeechService] Error en OnSpeechStarted: {ex.Message}"); }
             cts = new CancellationTokenSource();
 
             try
             {
 #if UNITY_ANDROID && !UNITY_EDITOR
                 SpeakAndroid(cleanedText);
+                // El TTS nativo de Android es asíncrono: speak() retorna de
+                // inmediato. Hay que esperar a que termine para que IsSpeaking
+                // siga siendo true mientras la voz se reproduce de verdad.
+                await WaitForAndroidTtsToFinish(cts.Token);
 #else
                 await SpeakWindowsAsync(cleanedText, cts.Token);
 #endif
@@ -69,7 +75,8 @@ namespace OllamaVoice
             finally
             {
                 isSpeaking = false;
-                OnSpeechFinished?.Invoke();
+                try { OnSpeechFinished?.Invoke(); }
+                catch (Exception ex) { Debug.LogWarning($"[TextToSpeechService] Error en OnSpeechFinished: {ex.Message}"); }
             }
         }
 
@@ -78,6 +85,11 @@ namespace OllamaVoice
         /// </summary>
         public void Stop()
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // Detener la reproducción nativa del TTS de Android.
+            try { ttsObject?.Call("stop"); } catch { }
+#endif
+
             if (cts != null && !cts.IsCancellationRequested)
             {
                 cts.Cancel();
@@ -99,7 +111,8 @@ namespace OllamaVoice
             if (isSpeaking)
             {
                 isSpeaking = false;
-                OnSpeechFinished?.Invoke();
+                try { OnSpeechFinished?.Invoke(); }
+                catch (Exception ex) { Debug.LogWarning($"[TextToSpeechService] Error en OnSpeechFinished: {ex.Message}"); }
             }
         }
 
@@ -184,6 +197,39 @@ namespace OllamaVoice
             if (ttsObject != null)
             {
                 ttsObject.Call<int>("speak", text, 0, null, "OllamaTTS");
+            }
+        }
+
+        /// <summary>
+        /// Espera a que el TTS nativo termine de reproducir el texto.
+        /// Se consulta la propiedad isSpeaking() de android.speech.tts.TextToSpeech.
+        /// </summary>
+        private async Task WaitForAndroidTtsToFinish(CancellationToken token)
+        {
+            if (ttsObject == null) return;
+
+            // El motor puede tardar en arrancar: esperar hasta ~1 s a que empiece.
+            float waited = 0f;
+            while (!token.IsCancellationRequested && waited < 1f)
+            {
+                bool started;
+                try { started = ttsObject.Call<bool>("isSpeaking"); }
+                catch { return; }
+                if (started) break;
+
+                await Task.Delay(50);
+                waited += 0.05f;
+            }
+
+            // Esperar a que deje de hablar (o a que se cancele con Stop()).
+            while (!token.IsCancellationRequested)
+            {
+                bool stillSpeaking;
+                try { stillSpeaking = ttsObject.Call<bool>("isSpeaking"); }
+                catch { break; }
+
+                if (!stillSpeaking) break;
+                await Task.Delay(100);
             }
         }
 #endif
