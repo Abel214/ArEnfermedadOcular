@@ -280,8 +280,17 @@ public class ARInteractionManager : MonoBehaviour
             GameObject arPositionCanvasObj = GameObject.Find("ARPositionCanvas");
             if (arPositionCanvasObj != null)
             {
-                arPositionCanvasObj.SetActive(false);
+                // Ocultar solo los botones de confirmar/rechazar (hijos 0 y 1),
+                // sin desactivar el canvas completo: si se desactiva el canvas,
+                // al colocar el siguiente modelo los botones ya no reaparecen
+                // (GameObject.Find no encuentra objetos inactivos).
+                arPositionCanvasObj.transform.GetChild(0).gameObject.SetActive(false);
+                arPositionCanvasObj.transform.GetChild(1).gameObject.SetActive(false);
             }
+
+            // Avisar al HUD que el modelo ya quedó fijado: habilita los botones
+            // de eliminar/captura y el toque en pantalla para volver a mostrarlos.
+            FindAnyObjectByType<ARHUDManager>()?.OnModeloColocado();
 
             Debug.Log("Posición del modelo aprobada y fijada correctamente en el entorno AR.");
         }
@@ -304,6 +313,11 @@ public class ARInteractionManager : MonoBehaviour
         isDragging = false;
         isPlacingMode = false;
         ClearActiveItem();
+
+        // Resetear el HUD: al eliminarse el modelo, los botones de
+        // eliminar/captura se ocultan y el toque no debe volver a mostrarlos
+        // hasta que se coloque y apruebe otro modelo.
+        FindAnyObjectByType<ARHUDManager>()?.OnModeloEliminado();
 
         if (GameManager.instance != null)
             GameManager.instance.ItemsMenu();

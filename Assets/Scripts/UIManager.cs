@@ -84,6 +84,12 @@ public class UIManager : MonoBehaviour
         // Mostrar controles de posición en AR
         if (arPositionCanvas != null)
         {
+            // Reactivar el canvas y sus botones (Delete/Aprove): el flujo de
+            // aprobado los oculta con SetActive(false) y, si no se reactivan
+            // aquí, al colocar el siguiente modelo ya no reaparecen.
+            arPositionCanvas.SetActive(true);
+            arPositionCanvas.transform.GetChild(0).gameObject.SetActive(true);
+            arPositionCanvas.transform.GetChild(1).gameObject.SetActive(true);
             arPositionCanvas.transform.GetChild(0).transform.DOScale(Vector3.one, 0.3f);
             arPositionCanvas.transform.GetChild(1).transform.DOScale(Vector3.one, 0.3f);
         }

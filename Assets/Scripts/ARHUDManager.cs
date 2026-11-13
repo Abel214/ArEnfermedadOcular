@@ -78,6 +78,21 @@ public class ARHUDManager : MonoBehaviour
         MostrarBotonesSecundarios();
     }
 
+    // ─── CUANDO SE ELIMINA EL MODELO ─────────────
+    public void OnModeloEliminado()
+    {
+        modeloColocado = false;
+
+        if (ocultarCoroutine != null)
+        {
+            StopCoroutine(ocultarCoroutine);
+            ocultarCoroutine = null;
+        }
+
+        // Ocultar los botones secundarios con animación de salida
+        OcultarBotonesSecundarios(true);
+    }
+
     // ─── MOSTRAR BOTONES SECUNDARIOS ─────────────
     public void MostrarBotonesSecundarios()
     {

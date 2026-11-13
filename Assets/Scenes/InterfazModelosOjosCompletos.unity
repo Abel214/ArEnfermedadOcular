@@ -287,7 +287,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2092946355}
+  m_Father: {fileID: 839799199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
@@ -3259,6 +3259,8 @@ RectTransform:
   m_Children:
   - {fileID: 1065726397}
   - {fileID: 162475873}
+  - {fileID: 1389808289}
+  - {fileID: 26959627}
   m_Father: {fileID: 1023705328}
   m_LocalEulerAnglesHint: {x: -22.706, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5272,7 +5274,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2092946355}
+  m_Father: {fileID: 839799199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6822,8 +6824,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ARHUDManager
   btnMicrofono: {fileID: 453363389}
   textoGuia: {fileID: 343508538}
-  btnEliminar: {fileID: 0}
-  btnCaptura: {fileID: 0}
+  btnEliminar: {fileID: 1389808288}
+  btnCaptura: {fileID: 26959626}
   btnVolver: {fileID: 0}
   imgMicrofono: {fileID: 1783892145}
   colorIdle: {r: 0, g: 0, b: 0, a: 0}
@@ -8617,8 +8619,6 @@ RectTransform:
   m_Children:
   - {fileID: 1890834962}
   - {fileID: 1796759434}
-  - {fileID: 1389808289}
-  - {fileID: 26959627}
   - {fileID: 139855252}
   - {fileID: 2132361658}
   m_Father: {fileID: 1023705328}
