@@ -24,6 +24,27 @@ public class VoiceComanderManage : MonoBehaviour
     {
         Debug.Log("=== COMANDO RECIBIDO: " + comando + " ===");
 
+        bool silenciarVoz = comando.Contains("silencio") || comando.Contains("callar")
+                            || comando.Contains("detener") || comando.Contains("basta");
+
+        var tts = FindAnyObjectByType<OllamaVoice.TextToSpeechService>(FindObjectsInactive.Include);
+        bool ttsHablando = tts != null && tts.IsSpeaking;
+
+        // Mientras el asistente esté hablando, solo se acepta el comando de
+        // silencio. Todo lo demás que escuche el micrófono es eco de la propia
+        // voz del asistente y debe ignorarse para no disparar comandos falsos.
+        if (ttsHablando)
+        {
+            if (silenciarVoz) SilenciarVoz();
+            return;
+        }
+
+        if (silenciarVoz)
+        {
+            SilenciarVoz();
+            return;
+        }
+
         if (comando.Contains("colocar") || comando.Contains("modelo")
             || comando.Contains("objeto") || comando.Contains("mostrar"))
         {
@@ -112,6 +133,19 @@ public class VoiceComanderManage : MonoBehaviour
     }
 
     // ═══════════════════════════════════════════════════════
+    // COMANDO DE VOZ: SILENCIAR LA VOZ DEL ASISTENTE (TTS)
+    // ═══════════════════════════════════════════════════════
+    void SilenciarVoz()
+    {
+        var tts = FindAnyObjectByType<OllamaVoice.TextToSpeechService>(FindObjectsInactive.Include);
+        if (tts != null && tts.IsSpeaking)
+        {
+            tts.Stop();
+            Debug.Log("Voz del asistente silenciada por comando de voz.");
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // COMANDO DE VOZ: ABRIR / CERRAR EL CHAT DEL ASISTENTE
     // (Ollama_Chat_Canvas / Ollama_Chat_Panel)
     // ═══════════════════════════════════════════════════════
@@ -124,13 +158,19 @@ public class VoiceComanderManage : MonoBehaviour
             return;
         }
 
-        chatUI.OpenChatPanel();
+        // Sin teclado: si el input toma foco, el teclado de Android roba el
+        // foco de audio y corta el reconocimiento de voz nativo.
+        chatUI.OpenChatPanel(false);
 
-        // Pausar la sesión de comandos de voz de la app: el SpeechRecognizer
-        // nativo mantiene el micrófono ocupado y así se bloquea la grabación
-        // del micrófono del chat (MicButton / Whisper).
-        if (AndroidVoiceRecognizer.Instance != null)
-            AndroidVoiceRecognizer.Instance.DetenerEscuchaManual();
+        // Reactivar la sesión de comandos de voz en el siguiente frame:
+        // hacerlo dentro del callback del propio SpeechRecognizer destruye
+        // el recognizer mientras está entregando su resultado y la escucha
+        // muere ("abrir chat" y luego no detecta nada).
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            if (AndroidVoiceRecognizer.Instance != null)
+                AndroidVoiceRecognizer.Instance.IniciarEscuchaManual();
+        });
 
         Debug.Log("Chat del asistente abierto por comando de voz.");
     }

@@ -297,12 +297,7 @@ namespace OllamaIntegration
         {
             if (provider == ChatProviderType.Gemini)
             {
-                return new GeminiChatProvider(
-                    geminiModel,
-                    geminiApiKeyEnvVar,
-                    timeoutSeconds,
-                    geminiMaxOutputTokens,
-                    temperature);
+                return new GeminiChatProvider();
             }
 
             int threadCount = Mathf.Clamp(SystemInfo.processorCount - 1, 2, 8);

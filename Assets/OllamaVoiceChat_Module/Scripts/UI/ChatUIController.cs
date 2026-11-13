@@ -40,6 +40,15 @@ namespace OllamaUI
         [Tooltip("Si está en OFF, el botón 'Clave' del chat se oculta y la app usa la clave de fábrica de GeminiKeyStore.")]
         [SerializeField] private bool showKeyButton = false;
 
+        [Header("Botón PARAR Voz (TTS)")]
+        [Tooltip("Si está en OFF, el botón PARAR no se crea; la voz se silencia por comando de voz ('silencio'/'callar'/'detener'/'basta').")]
+        [SerializeField] private bool showTtsStopButton = false;
+
+        // Botón PARAR/VOZ: interrumpe la voz del asistente (TTS). Se crea por código.
+        private OllamaVoice.TextToSpeechService ttsService;
+        private GameObject ttsStopButton;
+        private TMP_Text ttsStopLabel;
+
         // Panel de clave Gemini (se crea en tiempo de ejecución, no en la escena)
         private GameObject keyPanel;
         private TMP_InputField keyInput;
@@ -169,6 +178,8 @@ namespace OllamaUI
             RefreshTitle();
             UpdateStatus("Listo");
             AddAssistantBubble("Hola, ¿en qué te ayudo?");
+            EnsureTtsService();
+            CreateTtsStopButton();
         }
 
         /// <summary>
@@ -198,6 +209,106 @@ namespace OllamaUI
                 chatManager.ProviderChanged -= HandleProviderChanged;
                 chatManager.ActiveModelChanged -= HandleActiveModelChanged;
             }
+
+            if (ttsService != null)
+            {
+                ttsService.OnSpeechStarted -= HandleTtsStateChanged;
+                ttsService.OnSpeechFinished -= HandleTtsStateChanged;
+            }
+        }
+
+        // ── Botón PARAR/VOZ (interrumpir al asistente) ─────────
+        private void EnsureTtsService()
+        {
+            if (ttsService == null)
+            {
+                ttsService = FindAnyObjectByType<OllamaVoice.TextToSpeechService>(FindObjectsInactive.Include);
+            }
+
+            if (ttsService != null)
+            {
+                ttsService.OnSpeechStarted -= HandleTtsStateChanged;
+                ttsService.OnSpeechStarted += HandleTtsStateChanged;
+                ttsService.OnSpeechFinished -= HandleTtsStateChanged;
+                ttsService.OnSpeechFinished += HandleTtsStateChanged;
+            }
+        }
+
+        private void HandleTtsStateChanged()
+        {
+            UpdateTtsButtonVisual();
+        }
+
+        private void CreateTtsStopButton()
+        {
+            if (!showTtsStopButton) return;
+            if (chatPanel == null || ttsStopButton != null) return;
+
+            GameObject go = new GameObject("TtsStopButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            go.transform.SetParent(chatPanel.transform, false);
+            go.transform.SetAsLastSibling();
+
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(0f, 0f);
+            rect.pivot = new Vector2(0f, 0f);
+            rect.anchoredPosition = new Vector2(14f, 134f);
+            rect.sizeDelta = new Vector2(110f, 92f);
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0.10f, 0.16f, 0.22f, 0.95f);
+            Round(go, 18f);
+
+            var btn = go.GetComponent<Button>();
+            btn.targetGraphic = img;
+            btn.onClick.AddListener(OnTtsStopButtonClicked);
+
+            GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelObj.transform.SetParent(go.transform, false);
+            var label = labelObj.GetComponent<TextMeshProUGUI>();
+            Stretch(label.rectTransform);
+            label.alignment = TextAlignmentOptions.Center;
+            label.fontSize = 34;
+            label.color = Color.white;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            if (appFont != null) label.font = appFont;
+
+            ttsStopLabel = label;
+            ttsStopButton = go;
+            UpdateTtsButtonVisual();
+        }
+
+        private void UpdateTtsButtonVisual()
+        {
+            bool speaking = ttsService != null && ttsService.IsSpeaking;
+
+            if (ttsStopLabel != null)
+            {
+                ttsStopLabel.text = speaking ? "PARAR" : "VOZ";
+                ttsStopLabel.color = speaking ? new Color(1f, 0.75f, 0.7f, 1f) : Color.white;
+            }
+
+            if (ttsStopButton != null)
+            {
+                ttsStopButton.GetComponent<Image>().color = speaking
+                    ? new Color(0.55f, 0.13f, 0.13f, 0.95f)
+                    : new Color(0.10f, 0.16f, 0.22f, 0.95f);
+            }
+        }
+
+        private void OnTtsStopButtonClicked()
+        {
+            EnsureTtsService();
+            if (ttsService == null)
+            {
+                UpdateStatus("Servicio de voz no disponible.");
+                return;
+            }
+
+            if (ttsService.IsSpeaking)
+            {
+                ttsService.Stop();
+                UpdateStatus("Voz silenciada");
+            }
         }
 
         // ── Panel ──────────────────────────────────────────────
@@ -218,12 +329,17 @@ namespace OllamaUI
             }
         }
 
-        public void OpenChatPanel()
+        /// <summary>
+        /// Abre el panel del chat. activateInput=false evita abrir el teclado
+        /// en pantalla (útil al abrir por comando de voz: el teclado roba el
+        /// foco de audio y mata la sesión de reconocimiento nativa).
+        /// </summary>
+        public void OpenChatPanel(bool activateInput = true)
         {
             if (chatPanel != null)
             {
                 chatPanel.SetActive(true);
-                if (inputField != null)
+                if (activateInput && inputField != null)
                 {
                     inputField.ActivateInputField();
                 }

@@ -116,6 +116,12 @@ namespace OllamaVoice
 
             if (micRecorder != null && micRecorder.IsRecording) return;
 
+            // Liberar el micrófono: si la sesión de comandos de voz nativa
+            // (SpeechRecognizer de Android) está activa, retiene el micrófono
+            // y la grabación del chat saldría vacía.
+            if (AndroidVoiceRecognizer.Instance != null)
+                AndroidVoiceRecognizer.Instance.DetenerEscuchaManual();
+
             StartRecording();
         }
 
@@ -238,9 +244,15 @@ namespace OllamaVoice
 
         private void HandleSpeechStarted()
         {
+            // Reactivar la sesión de comandos nativa para que el usuario pueda
+            // interrumpir la voz del asistente diciendo "silencio" mientras
+            // habla. VoiceComanderManage ignora el eco (solo acepta silenciar).
+            if (AndroidVoiceRecognizer.Instance != null)
+                AndroidVoiceRecognizer.Instance.IniciarEscuchaManual();
+
             if (uiController != null)
             {
-                uiController.SetStatusText("El asistente está hablando...");
+                uiController.SetStatusText("El asistente está hablando... (di 'silencio' o toca PARAR)");
             }
         }
 

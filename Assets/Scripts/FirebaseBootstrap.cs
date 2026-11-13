@@ -14,7 +14,7 @@ public class FirebaseBootstrap : MonoBehaviour
 
         // App Check ANTES de cualquier otro servicio Firebase.
         // Solo se configura si estamos en el Editor o en un Development Build.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || APPCHECK_DEBUG
         // 1. Fijamos el token de depuración antes de registrar la fábrica.
         // NOTA: Asegúrate de tener una clase "DebugSecrets" con la constante "AppCheckToken".
         DebugAppCheckProviderFactory.Instance.SetDebugToken(DebugSecrets.AppCheckToken);
